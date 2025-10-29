@@ -149,13 +149,23 @@ int which_key(int high,int low){
 	return -1;
 }
 
+int KEYBOARD_cnt = 0;
+
 char KEYBOARD_Scan(){
 	uint32_t PE0_PE3_state;
+
+	if (KEYBOARD_cnt > 0){
+		KEYBOARD_cnt--;
+		return -1;
+	}
+
 	GPIOE->ODR &= ~(GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 0x0000
 	delay_ms(1);
 	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
 	if (PE0_PE3_state == 0xf)
 		return -1; // 无按键按下
+
+	KEYBOARD_cnt = 50000; // 一定时间内不允许输入
 
 	GPIOE->ODR ^= (GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 0x1110
 	delay_ms(1);
