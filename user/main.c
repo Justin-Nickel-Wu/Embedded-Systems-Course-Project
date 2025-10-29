@@ -30,6 +30,8 @@ extern void KEY_Init(void);
 extern u8 KEY_Scan(void);
 extern void KEYBOARD_Init(void);
 extern char KEYBOARD_Scan(void);
+extern void DIGIT_Init(void);
+extern void DIGIT_display(char digit,int position);
 
 void BoardInit()
 {
@@ -39,24 +41,25 @@ void BoardInit()
 
 int main(void)
 {
-	u8 t=0;
-	int id=5;
-	
-	// 在这里写初始化代码，例如初始化按键连接的引脚为输入，led连接的引脚为输出
-	//可以是函数，也可以直接写代码。建议使用函数调用方式，提高程序主题的可读性。
+	int pos = 0, cnt = 0;
+	char digit = '0', tmp;
+  // 初始化
 	LED_Init();
 	KEY_Init();
+	KEYBOARD_Init();
+	DIGIT_Init();
 	
-	while(1)
-	{
-			//在这里写控制代码，例如循环点亮led，按键扫描等
-			//回顾第2课时的软件开发方法，巡回方式或前后台方式
-		t= KEY_Scan();
-		
-		if (t == 1)
-			id=(id+1)%6;
-		
-		LED_Turn(id);
+
+	while (1){
+		  tmp = KEYBOARD_Scan();
+    	if (tmp != 0)
+    		digit = tmp;
+
+		if ((++cnt) > 100){
+			pos = (pos + 1) % 4;
+			cnt = 0;
+		}
+		DIGIT_display(digit, pos);
 	}
 	return 1;
 }
