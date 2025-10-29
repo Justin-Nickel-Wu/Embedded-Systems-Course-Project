@@ -141,46 +141,45 @@ void KEYBOARD_Init(void){
 }
 
 int which_key(int high,int low){
-	int x, ret, i;
-	x = high << 4 | low;
+	int x, i;
+	x = (high << 4) | low;
 	for (i=0; i<16; i++)
-		if (key_map[i] == x){
-			ret = i;
-			break;
-		}
-	return ret;
+		if (key_map[i] == x)
+			return i;
+	return -1;
 }
 
 char KEYBOARD_Scan(){
 	uint32_t PE0_PE3_state;
-	GPIOE->ODR &= ~(GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 行置0
+	GPIOE->ODR &= ~(GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 0x0000
+	delay_ms(1);
 	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
 	if (PE0_PE3_state == 0xf)
 		return -1; // 无按键按下
 
-	GPIOE->ODR |= (GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 0x1110
+	GPIOE->ODR ^= (GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 0x1110
+	delay_ms(1);
 	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
 	if (PE0_PE3_state != 0xf)
-		return which_key(14, PE0_PE3_state); // 无按键按下
-	GPIOE->ODR &= ~(GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 行置0
+		return which_key(14, PE0_PE3_state);
 
-	GPIOE->ODR |= (GPIO_PIN_4 | GPIO_PIN_6 | GPIO_PIN_7); // 0x1101
+	GPIOE->ODR ^= (GPIO_PIN_4 | GPIO_PIN_5); // 0x1101
+	delay_ms(1);
 	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
 	if (PE0_PE3_state != 0xf)
-		return which_key(13, PE0_PE3_state); // 无按键按下
-	GPIOE->ODR &= ~(GPIO_PIN_4 | GPIO_PIN_6 | GPIO_PIN_7); // 行置0
+		return which_key(13, PE0_PE3_state);
 
-	GPIOE->ODR |= (GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_7); // 0x1011
+	GPIOE->ODR ^= (GPIO_PIN_5 | GPIO_PIN_6); // 0x1011
+	delay_ms(1);
 	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
 	if (PE0_PE3_state != 0xf)
-		return which_key(11,PE0_PE3_state); // 无按键按下
-	GPIOE->ODR &= ~(GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_7); // 行置0
+		return which_key(11,PE0_PE3_state);
 
-	GPIOE->ODR |= (GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6); // 0x0111
+	GPIOE->ODR ^= (GPIO_PIN_6 | GPIO_PIN_7); // 0x0111
+	delay_ms(1);
 	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
 	if (PE0_PE3_state != 0xf)
-		return which_key(7,PE0_PE3_state); // 无按键按下
-	GPIOE->ODR &= ~(GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6); // 行置0
+		return which_key(7,PE0_PE3_state);
 
 	return -1; // 错误
 }
@@ -225,10 +224,8 @@ void DIGIT_Init(void){
 void DIGIT_display(int digit,int position){
 	// 先关闭所有位选
 	GPIOC->ODR|=15<<10; //PC.10 11 12 13 输出高
-
 	// 设置段选
 	GPIOD->ODR = (GPIOD->ODR & 0xFFFFFF00) | (digit_map[digit == -1  ? 16 : digit] & 0xFF);
-
 	// 打开对应位选
 	GPIOC->ODR &= ~(1 << (10 + position));
 }

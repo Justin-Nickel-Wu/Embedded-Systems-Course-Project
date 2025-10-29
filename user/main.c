@@ -54,7 +54,7 @@ int main(void)
 		tmp = KEYBOARD_Scan();
     	if (tmp != 0xff)
     		digit = tmp;
-		if ((++cnt) > 100){
+		if ((++cnt) > 3){
 			pos = (pos + 1) % 4;
 			cnt = 0;
 		}
