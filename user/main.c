@@ -42,8 +42,8 @@ void BoardInit()
 int main(void)
 {
 	int pos = 0, cnt = 0;
-	char digit = '0', tmp;
-  // ³õÊ¼»¯
+	int digit = 0, tmp;
+  // ï¿½ï¿½Ê¼ï¿½ï¿½
 	LED_Init();
 	KEY_Init();
 	KEYBOARD_Init();
@@ -51,10 +51,9 @@ int main(void)
 	
 
 	while (1){
-		  tmp = KEYBOARD_Scan();
-    	if (tmp != 0)
+		tmp = KEYBOARD_Scan();
+    	if (tmp != 0xff)
     		digit = tmp;
-
 		if ((++cnt) > 100){
 			pos = (pos + 1) % 4;
 			cnt = 0;

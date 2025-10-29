@@ -109,10 +109,10 @@ u8 KEY_Scan(void)
 //********************矩阵键盘*************************/
 int key_map[16];
 /*
-	{'1','2','3','A'},
-	{'4','5','6','B'},
-	{'7','8','9','C'},
-	{'*','0','#','D'}
+	{'A','B','C','D'},
+	{'1','2','3','E'},
+	{'4','5','6','F'},
+	{'7','8','9','0'}
 */
 
 // 初始化矩阵键盘
@@ -121,43 +121,26 @@ void KEYBOARD_Init(void){
 	GPIOE->CRL = 0X33338888; //PE.0 1 2 3 上拉输入 4 5 6 7 推挽输出
 
 	// 初始化按键映射表
-	key_map[0] = 237; 
-	key_map[1] = 126;
-	key_map[2] = 125;
-	key_map[3] = 123;
-	key_map[4] = 190;
-	key_map[5] = 189;
-	key_map[6] = 187;
-	key_map[7] = 222;
-	key_map[8] = 221; // 0b01101011
-	key_map[9] = 219;  // 0b01011011
+	key_map[0] = 231; 
+	key_map[1] = 190;
+	key_map[2] = 189;
+	key_map[3] = 187;
+	key_map[4] = 222;
+	key_map[5] = 221;
+	key_map[6] = 219;
+	key_map[7] = 238;
+	key_map[8] = 237; 
+	key_map[9] = 235;
 
-	key_map[10] = 126; // 0b01111110 A
-	key_map[11] = 123; // 0b01111011 B
-	key_map[12] = 57;  // 0b00111001 C
-	key_map[13] = 94;  // 0b01011110 D
-	key_map[14] = 237; // 0b11101101 *
-	key_map[15] = 125; // 0b01111101 #
-
-	// key_map[0b0111][0b0111] = '1';
-	// key_map[0b0111][0b1011] = '2';
-	// key_map[0b0111][0b1101] = '3';
-	// key_map[0b0111][0b1110] = 'A';
-	// key_map[0b1011][0b0111] = '4';
-	// key_map[0b1011][0b1011] = '5';
-	// key_map[0b1011][0b1101] = '6';
-	// key_map[0b1011][0b1110] = 'B';
-	// key_map[0b1101][0b0111] = '7';
-	// key_map[0b1101][0b1011] = '8';
-	// key_map[0b1101][0b1101] = '9';
-	// key_map[0b1101][0b1110] = 'C';
-	// key_map[0b1110][0b0111] = '*';
-	// key_map[0b1110][0b1011] = '0';
-	// key_map[0b1110][0b1101] = '#';
-	// key_map[0b1110][0b1110] = 'D';
+	key_map[10] = 126; //A
+	key_map[11] = 125; //B
+	key_map[12] = 123; //C
+	key_map[13] = 119; //D
+	key_map[14] = 183; //E
+	key_map[15] = 215; //F
 }
 
-char which_key(int high,int low){
+int which_key(int high,int low){
 	int x, ret, i;
 	x = high << 4 | low;
 	for (i=0; i<16; i++)
@@ -165,18 +148,15 @@ char which_key(int high,int low){
 			ret = i;
 			break;
 		}
-	if (i < 10)
-		return '0' + ret;
-	else
-		return 'A' + (ret - 10);
+	return ret;
 }
 
 char KEYBOARD_Scan(){
 	uint32_t PE0_PE3_state;
 	GPIOE->ODR &= ~(GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 行置0
 	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
-	if (PE0_PE3_state != 0xf)
-		return 0; // 无按键按下
+	if (PE0_PE3_state == 0xf)
+		return -1; // 无按键按下
 
 	GPIOE->ODR |= (GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 0x1110
 	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
@@ -202,11 +182,11 @@ char KEYBOARD_Scan(){
 		return which_key(7,PE0_PE3_state); // 无按键按下
 	GPIOE->ODR &= ~(GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6); // 行置0
 
-	return 0;
+	return -1; // 错误
 }
 
 //********************数码管*************************/
-int digit_map[256];
+int digit_map[17];
 // 初始化数码管
 void DIGIT_Init(void){
 	RCC->APB2ENR|=3<<4; //使能 PORTC 和 PORTD 时钟
@@ -223,29 +203,31 @@ void DIGIT_Init(void){
 	GPIOC->BSRR = GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13;
 
 	// 初始化数码管编码映射表
-	digit_map['0'] = 192;  //0b11000000
-	digit_map['1'] = 249;  //0b11111001
-	digit_map['2'] = 91 ^ 0xff;  //0b01011011
-	digit_map['3'] = 79 ^ 0xff;  //0b01001111
-	digit_map['4'] = 102 ^ 0xff; //0b01100110
-	digit_map['5'] = 109 ^ 0xff; //0b01101101
-	digit_map['6'] = 125 ^ 0xff; //0b01111101
-	digit_map['7'] = 7 ^ 0xff;   //0b00000111
-	digit_map['8'] = 127 ^ 0xff; //0b01111111
-	digit_map['9'] = 111 ^ 0xff; //0b01101111
-
-	digit_map['A'] = 119; //0b01110111
-	digit_map['B'] = 124; //0b01111100
-	digit_map['C'] = 57;  //0b00111001
-	digit_map['D'] = 118; //0b01011110
+	digit_map[0] = 192;
+	digit_map[1] = 249; 
+	digit_map[2] = 164;
+	digit_map[3] = 176;
+	digit_map[4] = 153;
+	digit_map[5] = 146;
+	digit_map[6] = 130;
+	digit_map[7] = 248;
+	digit_map[8] = 128;
+	digit_map[9] = 144;
+	digit_map[10] = 136;
+	digit_map[11] = 131;
+	digit_map[12] = 198;
+	digit_map[13] = 161;
+	digit_map[14] = 134;
+	digit_map[15] = 142;
+	digit_map[16] = 127; // 输出单点，表示出错
 }
 
-void DIGIT_display(char digit,int position){
+void DIGIT_display(int digit,int position){
 	// 先关闭所有位选
 	GPIOC->ODR|=15<<10; //PC.10 11 12 13 输出高
 
 	// 设置段选
-	GPIOD->ODR = (GPIOD->ODR & 0xFFFFFF00) | (digit_map[(int)digit] & 0xFF);
+	GPIOD->ODR = (GPIOD->ODR & 0xFFFFFF00) | (digit_map[digit == -1  ? 16 : digit] & 0xFF);
 
 	// 打开对应位选
 	GPIOC->ODR &= ~(1 << (10 + position));
