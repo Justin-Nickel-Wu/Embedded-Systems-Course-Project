@@ -28,6 +28,8 @@ extern void LED_Init(void);
 extern void LED_Turn(int id);
 extern void KEY_Init(void);
 extern u8 KEY_Scan(void);
+extern void KEYBOARD_Init(void);
+extern char KEYBOARD_Scan(void);
 
 void BoardInit()
 {

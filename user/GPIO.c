@@ -95,3 +95,62 @@ u8 KEY_Scan(void)
 	} 
  	return 0;// 无按键按下
 }
+
+//********************矩阵键盘*************************/
+char key_map[16][16];
+/*
+	{'1','2','3','A'},
+	{'4','5','6','B'},
+	{'7','8','9','C'},
+	{'*','0','#','D'}
+*/
+
+// 初始化矩阵键盘
+void KEYBOARD_Init(void){
+	RCC->APB2ENR |= 1<<6; //使能 PORTE时钟
+	GPIOE->CRL = 0X33338888; //PE.0 1 2 3 上拉输入 4 5 6 7 推挽输出
+
+	// 初始化按键映射表
+	key_map[0b0111][0b0111] = '1', key_map[0b0111][0b1011] = '2', key_map[0b0111][0b1101] = '3', key_map[0b0111][0b1110] = 'A';
+	key_map[0b1011][0b0111] = '4', key_map[0b1011][0b1011] = '5', key_map[0b1011][0b1101] = '6', key_map[0b1011][0b1110] = 'B';
+	key_map[0b1101][0b0111] = '7', key_map[0b1101][0b1011] = '8', key_map[0b1101][0b1101] = '9', key_map[0b1101][0b1110] = 'C';
+	key_map[0b1110][0b0111] = '*', key_map[0b1110][0b1011] = '0', key_map[0b1110][0b1101] = '#', key_map[0b1110][0b1110] = 'D';
+}
+
+char which_key(int high,int low){
+	return key_map[high][low];
+}
+
+char KEYBOARD_Scan(){
+	uint32_t PE0_PE3_state;
+	GPIOE->ODR &= ~(GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 行置0
+	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
+	if (PE0_PE3_state != 0xf)
+		return 0; // 无按键按下
+
+	GPIOE->ODR |= (GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 0x1110
+	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
+	if (PE0_PE3_state != 0b1111)
+		return which_key(0b1110, PE0_PE3_state); // 无按键按下
+	GPIOE->ODR &= ~(GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 行置0
+
+	GPIOE->ODR |= (GPIO_PIN_4 | GPIO_PIN_6 | GPIO_PIN_7); // 0x1101
+	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
+	if (PE0_PE3_state != 0b1111)
+		return which_key(0b1101, PE0_PE3_state); // 无按键按下
+	GPIOE->ODR &= ~(GPIO_PIN_4 | GPIO_PIN_6 | GPIO_PIN_7); // 行置0
+
+	GPIOE->ODR |= (GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_7); // 0x1011
+	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
+	if (PE0_PE3_state != 0b1111)
+		return which_key(0b1011,PE0_PE3_state); // 无按键按下
+	GPIOE->ODR &= ~(GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_7); // 行置0
+
+	GPIOE->ODR |= (GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6); // 0x0111
+	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
+	if (PE0_PE3_state != 0b1111)
+		return which_key(0b0111,PE0_PE3_state); // 无按键按下
+	GPIOE-ODR &= ~(GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6); // 行置0
+
+	return 0;
+}
