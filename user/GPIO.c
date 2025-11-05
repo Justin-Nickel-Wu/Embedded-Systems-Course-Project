@@ -18,15 +18,6 @@
 #define GPIOB_IDR           (*((volatile unsigned int*)0x40010C08))   // 端口输入数据寄存器	
 #define GPIOB_BSRR          (*((volatile unsigned int*)0x40010C10))   // 端口位设置/复位寄存器	
 
-#define GPIO_PIN_0          (1 << 0)
-#define GPIO_PIN_1          (1 << 1)
-#define GPIO_PIN_2          (1 << 2)
-#define GPIO_PIN_3          (1 << 3)
-#define GPIO_PIN_4          (1 << 4)
-#define GPIO_PIN_5          (1 << 5)
-#define GPIO_PIN_6          (1 << 6)
-#define GPIO_PIN_7          (1 << 7)
-
 void LED_Init(void)
 {
 	RCC_APB2ENR |= 1<<6;          //使能PORTE时钟	
@@ -117,8 +108,19 @@ int key_map[16];
 
 // 初始化矩阵键盘
 void KEYBOARD_Init(void){
-	RCC->APB2ENR |= 1<<6; //使能 PORTE时钟
-	GPIOE->CRL = 0X33338888; //PE.0 1 2 3 上拉输入 4 5 6 7 推挽输出
+	GPIO_InitTypeDef Keyboard_Init;
+	
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE); //使能 PORTE时钟
+	
+	Keyboard_Init.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
+	Keyboard_Init.GPIO_Mode = GPIO_Mode_IPU;
+	Keyboard_Init.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOE, &Keyboard_Init); // PE0~3 上拉输入
+	
+	Keyboard_Init.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+	Keyboard_Init.GPIO_Mode = GPIO_Mode_Out_PP;
+	Keyboard_Init.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_Init(GPIOE, &Keyboard_Init); // PE4~7 推挽输出
 
 	// 初始化按键映射表
 	key_map[0] = 231; 
@@ -159,35 +161,38 @@ char KEYBOARD_Scan(){
 		return -1;
 	}
 
-	GPIOE->ODR &= ~(GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 0x0000
+	GPIO_ResetBits(GPIOE, GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7); // 0x0000
 	delay_ms(1);
-	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
+	PE0_PE3_state =  GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // 读出列
 	if (PE0_PE3_state == 0xf)
 		return -1; // 无按键按下
 
 	KEYBOARD_cnt = 50000; // 一定时间内不允许输入
 
-	GPIOE->ODR ^= (GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7); // 0x1110
+	GPIO_SetBits(GPIOE, GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7); // 0x1110
 	delay_ms(1);
-	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
+	PE0_PE3_state = GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // 读出列
 	if (PE0_PE3_state != 0xf)
 		return which_key(14, PE0_PE3_state);
 
-	GPIOE->ODR ^= (GPIO_PIN_4 | GPIO_PIN_5); // 0x1101
+	GPIO_SetBits(GPIOE, GPIO_Pin_4);
+	GPIO_ResetBits(GPIOE, GPIO_Pin_5); // 0x1101
 	delay_ms(1);
-	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
+	PE0_PE3_state = GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // 读出列
 	if (PE0_PE3_state != 0xf)
 		return which_key(13, PE0_PE3_state);
 
-	GPIOE->ODR ^= (GPIO_PIN_5 | GPIO_PIN_6); // 0x1011
+	GPIO_SetBits(GPIOE, GPIO_Pin_5);
+	GPIO_ResetBits(GPIOE, GPIO_Pin_6); // 0x1011
 	delay_ms(1);
-	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
+	PE0_PE3_state = GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // 读出列
 	if (PE0_PE3_state != 0xf)
 		return which_key(11,PE0_PE3_state);
 
-	GPIOE->ODR ^= (GPIO_PIN_6 | GPIO_PIN_7); // 0x0111
+	GPIO_SetBits(GPIOE, GPIO_Pin_6);
+	GPIO_ResetBits(GPIOE, GPIO_Pin_7); // 0x0111
 	delay_ms(1);
-	PE0_PE3_state = GPIOE->IDR & (GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3); // 读出列
+	PE0_PE3_state = GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // 读出列
 	if (PE0_PE3_state != 0xf)
 		return which_key(7,PE0_PE3_state);
 
@@ -198,18 +203,24 @@ char KEYBOARD_Scan(){
 int digit_map[17];
 // 初始化数码管
 void DIGIT_Init(void){
-	RCC->APB2ENR|=3<<4; //使能 PORTC 和 PORTD 时钟
-	GPIOC->CRH&=0xFF0000FF;
-	GPIOC->CRH|=0x00333300; //PC.10 11 12 13 推挽输出
-	GPIOC->ODR|=15<<10; //PC.10 11 12 13 输出高
-
-	GPIOD->CRL&=0X00000000;
-	GPIOD->CRL|=0X33333333;//PD.0 1 2 3 4 5 6 7 推挽输出
-	GPIOD->ODR|= 0xFF; //PD.0 1 2 3 4 5 6 7 输出高
-
-	GPIOD->BSRR = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3; //输出高电平
-	GPIOD->BSRR = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
-	GPIOC->BSRR = GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13;
+    GPIO_InitTypeDef GPIO_InitStructure;
+    
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD, ENABLE);
+    
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;       // 推挽输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;      // 输出速度50MHz
+    GPIO_Init(GPIOC, &GPIO_InitStructure);
+    
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
+                                 GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;       // 推挽输出
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;      // 输出速度50MHz
+    GPIO_Init(GPIOD, &GPIO_InitStructure);
+    
+    GPIO_SetBits(GPIOC, GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13);
+    GPIO_SetBits(GPIOD, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
+                       GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
 
 	// 初始化数码管编码映射表
 	digit_map[0] = 192;
@@ -233,9 +244,9 @@ void DIGIT_Init(void){
 
 void DIGIT_display(int digit,int position){
 	// 先关闭所有位选
-	GPIOC->ODR|=15<<10; //PC.10 11 12 13 输出高
+    GPIO_SetBits(GPIOC, GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13);
 	// 设置段选
-	GPIOD->ODR = (GPIOD->ODR & 0xFFFFFF00) | (digit_map[digit == -1  ? 16 : digit] & 0xFF);
+	GPIO_Write(GPIOD, digit_map[digit == -1  ? 16 : digit] & 0xFF);
 	// 打开对应位选
-	GPIOC->ODR &= ~(1 << (10 + position));
+	GPIO_ResetBits(GPIOC, 1 << (10 + position));
 }
