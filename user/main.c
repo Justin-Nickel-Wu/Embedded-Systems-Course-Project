@@ -32,6 +32,10 @@ extern void KEYBOARD_Init(void);
 extern char KEYBOARD_Scan(void);
 extern void DIGIT_Init(void);
 extern void DIGIT_display(char digit,int position);
+extern void EXTIX_Init(void);
+
+extern int input_key;
+extern bool input_key_flag;
 
 void BoardInit()
 {
@@ -42,7 +46,6 @@ void BoardInit()
 int main(void)
 {
 
-  int tmp, i;
   int pos = 0, cnt = 0;
   int digit[4] = {0,1,2,3};
 
@@ -50,16 +53,16 @@ int main(void)
 	KEY_Init();
 	KEYBOARD_Init();
 	DIGIT_Init();
-	
+	EXTIX_Init();
 
 	while (1){
-		tmp = KEYBOARD_Scan();
-    	if (tmp != 0xff){
+    if (input_key_flag){
         digit[3] = digit[2];
         digit[2] = digit[1];
         digit[1] = digit[0];
-        digit[0] = tmp;
-      }
+        digit[0] = input_key;
+        input_key_flag = 0;
+    }
 		if ((++cnt) > 3){
 			pos = (pos + 1) % 4;
 			cnt = 0;

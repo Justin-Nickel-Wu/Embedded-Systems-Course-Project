@@ -106,6 +106,9 @@ int key_map[16];
 	{'7','8','9','0'}
 */
 
+int input_key;
+bool input_key_flag = 0;
+
 // ³õÊ¼»¯¾ØÕó¼üÅÌ
 void KEYBOARD_Init(void){
 	GPIO_InitTypeDef Keyboard_Init;
