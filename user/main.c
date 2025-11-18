@@ -33,6 +33,7 @@ extern char KEYBOARD_Scan(void);
 extern void DIGIT_Init(void);
 extern void DIGIT_display(char digit,int position);
 extern void EXTIX_Init(void);
+extern void systick_init(void);
 
 extern int input_key;
 extern bool input_key_flag;
@@ -43,17 +44,20 @@ void BoardInit()
 	SystemInit();
 }
 
+int digit_pos = 0;
+int digit[4] = {0,1,2,3};
+
 int main(void)
 {
 
-  int pos = 0, cnt = 0;
-  int digit[4] = {0,1,2,3};
+
 
 	LED_Init();
 	KEY_Init();
 	KEYBOARD_Init();
 	DIGIT_Init();
 	EXTIX_Init();
+	systick_init();
 
 	while (1){
     if (input_key_flag){
@@ -63,11 +67,6 @@ int main(void)
         digit[0] = input_key;
         input_key_flag = 0;
     }
-		if ((++cnt) > 3){
-			pos = (pos + 1) % 4;
-			cnt = 0;
-		}
-		DIGIT_display(digit[pos], pos);
 	}
 	return 1;
 }
