@@ -14,6 +14,7 @@
 *.obj
 *.dep
 *.iex
+*.docx
 
 # Listing and debug
 *.sct
