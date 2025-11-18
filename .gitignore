@@ -1,2 +1,35 @@
-Objects/*
-Listings/*
+# Keil uVision build output
+*.axf
+*.bin
+*.hex
+*.elf
+*.map
+*.htm
+*.lnp
+*.lst
+*.uvguix*
+*.crf
+*.d
+*.o
+*.obj
+*.dep
+*.iex
+
+# Listing and debug
+*.sct
+*.scvd
+*.uvoptx.bak
+
+# Auto-generated IDE files
+*.uvoptx
+*.uvopt
+*.uvprojx.bak
+*.uvproj.bak
+
+# Backup and temporary
+*~
+*.bak
+
+# Build directories (if you want)
+Objects/
+Listings/
