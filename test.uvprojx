@@ -390,9 +390,9 @@
               <FilePath>.\startup\core_cm3.c</FilePath>
             </File>
             <File>
-              <FileName>startup_stm32f10x_md.s</FileName>
+              <FileName>startup_stm32f10x_hd.s</FileName>
               <FileType>2</FileType>
-              <FilePath>.\Stm32lib\CMSIS\Core\CM3\startup\arm\startup_stm32f10x_md.s</FilePath>
+              <FilePath>.\startup\startup_stm32f10x_hd.s</FilePath>
             </File>
           </Files>
         </Group>
@@ -438,11 +438,6 @@
               <FileName>GPIO.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\user\GPIO.c</FilePath>
-            </File>
-            <File>
-              <FileName>stm32f10x_it.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\user\stm32f10x_it.c</FilePath>
             </File>
             <File>
               <FileName>sys.c</FileName>
