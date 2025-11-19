@@ -22,22 +22,12 @@
   * @{
   */ 
 
+
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
-extern void LED_Init(void);
-extern void LED_Turn(int id);
-extern void KEY_Init(void);
-extern u8 KEY_Scan(void);
-extern void KEYBOARD_Init(void);
-extern char KEYBOARD_Scan(void);
-extern void DIGIT_Init(void);
-extern void DIGIT_display(char digit,int position);
-extern void EXTIX_Init(void);
-extern void systick_init(void);
-extern void EXTI_KeyBoard_Scan(int input);
-
-extern int input_key;
-extern bool input_key_flag;
+#include "EXTI.h"
+#include "GPIO.h"
+#include "systick.h"
 
 void BoardInit()
 {
@@ -45,15 +35,8 @@ void BoardInit()
 	SystemInit();
 }
 
-int digit_pos = 0;
-int digit[4] = {0,1,2,3};
-int EXTI_input;
-bool EXTI_flag = 0;
-
 int main(void)
 {
-
-
 
 	LED_Init();
 	KEY_Init();
@@ -75,7 +58,7 @@ int main(void)
         input_key_flag = 0;
     }
 	}
-	return 1;
+	// return 1;
 }
 
 

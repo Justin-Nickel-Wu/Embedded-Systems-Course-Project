@@ -1,29 +1,28 @@
 /***********************************************************************
-ÎÄ¼þÃû³Æ£ºLED.C
-¹¦    ÄÜ£ºled  IO³õÊ¼»¯
-±àÐ´Ê±¼ä£º2013.4.25
-±à Ð´ ÈË£º
-×¢    Òâ£ºÒÔÏÂ´úÂë½ö¹©²Î¿¼
+ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½Æ£ï¿½LED.C
+ï¿½ï¿½    ï¿½Ü£ï¿½led  IOï¿½ï¿½Ê¼ï¿½ï¿½
+ï¿½ï¿½Ð´Ê±ï¿½ä£º2013.4.25
+ï¿½ï¿½ Ð´ ï¿½Ë£ï¿½
+×¢    ï¿½â£ºï¿½ï¿½ï¿½Â´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î¿ï¿½
 ***********************************************************************/
-#include "stm32f10x.h"
-#include "stm32f10x_gpio.h" 
+#include "GPIO.h"
 
-#define RCC_APB2ENR         (*((volatile unsigned int*)0x40021018))   // APB2 ÍâÉèÊ±ÖÓÊ¹ÄÜ¼Ä´æÆ÷
-#define GPIOE_CRH           (*((volatile unsigned int*)0x40011804))   // ¶Ë¿ÚÅäÖÃ¸ß¼Ä´æÆ÷
-#define GPIOE_BSRR          (*((volatile unsigned int*)0x40011810))   // ¶Ë¿ÚÎ»ÉèÖÃ/¸´Î»¼Ä´æÆ÷
-#define GPIOE_IDR           (*((volatile unsigned int*)0x40011808))   // ¶Ë¿ÚÊäÈëÊý¾Ý¼Ä´æÆ÷	
-#define GPIOE_ODR           (*((volatile unsigned int*)0x4001180C))   // ¶Ë¿ÚÊä³öÊý¾Ý¼Ä´æÆ÷
+#define RCC_APB2ENR         (*((volatile unsigned int*)0x40021018))   // APB2 ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½Ê¹ï¿½Ü¼Ä´ï¿½ï¿½ï¿½
+#define GPIOE_CRH           (*((volatile unsigned int*)0x40011804))   // ï¿½Ë¿ï¿½ï¿½ï¿½ï¿½Ã¸ß¼Ä´ï¿½ï¿½ï¿½
+#define GPIOE_BSRR          (*((volatile unsigned int*)0x40011810))   // ï¿½Ë¿ï¿½Î»ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½Î»ï¿½Ä´ï¿½ï¿½ï¿½
+#define GPIOE_IDR           (*((volatile unsigned int*)0x40011808))   // ï¿½Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¼Ä´ï¿½ï¿½ï¿½	
+#define GPIOE_ODR           (*((volatile unsigned int*)0x4001180C))   // ï¿½Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¼Ä´ï¿½ï¿½ï¿½
 	
-#define GPIOB_CRL           (*((volatile unsigned int*)0x40010C00))   // ¶Ë¿ÚÅäÖÃµÍ¼Ä´æÆ÷
-#define GPIOB_IDR           (*((volatile unsigned int*)0x40010C08))   // ¶Ë¿ÚÊäÈëÊý¾Ý¼Ä´æÆ÷	
-#define GPIOB_BSRR          (*((volatile unsigned int*)0x40010C10))   // ¶Ë¿ÚÎ»ÉèÖÃ/¸´Î»¼Ä´æÆ÷	
+#define GPIOB_CRL           (*((volatile unsigned int*)0x40010C00))   // ï¿½Ë¿ï¿½ï¿½ï¿½ï¿½ÃµÍ¼Ä´ï¿½ï¿½ï¿½
+#define GPIOB_IDR           (*((volatile unsigned int*)0x40010C08))   // ï¿½Ë¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý¼Ä´ï¿½ï¿½ï¿½	
+#define GPIOB_BSRR          (*((volatile unsigned int*)0x40010C10))   // ï¿½Ë¿ï¿½Î»ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½Î»ï¿½Ä´ï¿½ï¿½ï¿½	
 
 void LED_Init(void)
 {
-	RCC_APB2ENR |= 1<<6;          //Ê¹ÄÜPORTEÊ±ÖÓ	
+	RCC_APB2ENR |= 1<<6;          //Ê¹ï¿½ï¿½PORTEÊ±ï¿½ï¿½	
 	
-	GPIOE_CRH &=0XFFFFFFF0;       //Çå³ýPE8Òý½ÅÔ­À´ÉèÖÃ  
-	GPIOE_CRH |=0x3;			        //ÉèÖÃCNF8[1:0]Îª0x00£ºÍ¨ÓÃÍÆÍìÊä³öÄ£Ê½£¬MODE8[1:0]Îª0x11£ºÊä³öÄ£Ê½
+	GPIOE_CRH &=0XFFFFFFF0;       //ï¿½ï¿½ï¿½PE8ï¿½ï¿½ï¿½ï¿½Ô­ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½  
+	GPIOE_CRH |=0x3;			        //ï¿½ï¿½ï¿½ï¿½CNF8[1:0]Îª0x00ï¿½ï¿½Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½ï¿½ï¿½MODE8[1:0]Îª0x11ï¿½ï¿½ï¿½ï¿½ï¿½Ä£Ê½
 
 	GPIOE_CRH &= 0xFFFFFF0F;
 	GPIOE_CRH |= 0x00000030;
@@ -47,7 +46,7 @@ void Delay(unsigned int nCount)
 
 void LED_Turn(int id)
 {
-		if (id < 4){ //µ¥µÆ
+		if (id < 4){ //ï¿½ï¿½ï¿½ï¿½
 			GPIOE_ODR &= ~(1 << (8 + id));
 			Delay(0xfffff);
 			Delay(0xfffff);
@@ -69,9 +68,9 @@ void LED_Turn(int id)
 
 void KEY_Init(void)
 {
-		RCC_APB2ENR |=1<<3;    //Ê¹ÄÜPORTBÊ±ÖÓ	
-	  GPIOB_CRL &=~(0xf<<24);// PB.6ÉÏÀ­ÊäÈë	
-		GPIOB_CRL |=(0x08<<24);// PB.6ÉÏÀ­ÊäÈë	
+		RCC_APB2ENR |=1<<3;    //Ê¹ï¿½ï¿½PORTBÊ±ï¿½ï¿½	
+	  GPIOB_CRL &=~(0xf<<24);// PB.6ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½	
+		GPIOB_CRL |=(0x08<<24);// PB.6ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½	
 	  //GPIOB_ODR |= (1<<6);
 		GPIOB_BSRR = (1<< 6);
 }
@@ -86,7 +85,7 @@ u8 KEY_Scan(void)
   		key_1=1;
 	if(key_1==1)
 	{
-		delay_ms(100);//È¥¶¶¶¯ 
+		delay_ms(100);//È¥ï¿½ï¿½ï¿½ï¿½ 
 		if(GPIOB_IDR & 0x40)
 			key_1=0;
 
@@ -94,10 +93,10 @@ u8 KEY_Scan(void)
 		if(key_1==1)
 			return 1;
 	} 
- 	return 0;// ÎÞ°´¼ü°´ÏÂ
+ 	return 0;// ï¿½Þ°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 }
 
-//********************¾ØÕó¼üÅÌ*************************/
+//********************ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½*************************/
 int key_map[16];
 /*
 	{'A','B','C','D'},
@@ -107,25 +106,25 @@ int key_map[16];
 */
 
 int input_key;
-bool input_key_flag = 0;
+bool input_key_flag = false;
 
-// ³õÊ¼»¯¾ØÕó¼üÅÌ
+// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void KEYBOARD_Init(void){
 	GPIO_InitTypeDef Keyboard_Init;
 	
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE); //Ê¹ÄÜ PORTEÊ±ÖÓ
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOE, ENABLE); //Ê¹ï¿½ï¿½ PORTEÊ±ï¿½ï¿½
 	
 	Keyboard_Init.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3;
 	Keyboard_Init.GPIO_Mode = GPIO_Mode_IPU;
 	Keyboard_Init.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOE, &Keyboard_Init); // PE0~3 ÉÏÀ­ÊäÈë
+	GPIO_Init(GPIOE, &Keyboard_Init); // PE0~3 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	
 	Keyboard_Init.GPIO_Pin = GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
 	Keyboard_Init.GPIO_Mode = GPIO_Mode_Out_PP;
 	Keyboard_Init.GPIO_Speed = GPIO_Speed_50MHz;
-	GPIO_Init(GPIOE, &Keyboard_Init); // PE4~7 ÍÆÍìÊä³ö
+	GPIO_Init(GPIOE, &Keyboard_Init); // PE4~7 ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-	// ³õÊ¼»¯°´¼üÓ³Éä±í
+	// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ó³ï¿½ï¿½ï¿½
 	key_map[0] = 231; 
 	key_map[1] = 190;
 	key_map[2] = 189;
@@ -156,76 +155,78 @@ int which_key(int high,int low){
 
 int KEYBOARD_cnt = 0;
 
-char KEYBOARD_Scan(){
+char KEYBOARD_Scan(void){
 	uint32_t PE0_PE3_state;
 
 	if (KEYBOARD_cnt > 0){
 		KEYBOARD_cnt--;
-		return -1;
+		return (u8)-1;
 	}
 
 	GPIO_ResetBits(GPIOE, GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7); // 0x0000
 	delay_ms(1);
-	PE0_PE3_state =  GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // ¶Á³öÁÐ
+	PE0_PE3_state =  GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (PE0_PE3_state == 0xf)
-		return -1; // ÎÞ°´¼ü°´ÏÂ
+		return (u8)-1; // ï¿½Þ°ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
-	KEYBOARD_cnt = 50000; // Ò»¶¨Ê±¼äÄÚ²»ÔÊÐíÊäÈë
+	KEYBOARD_cnt = 50000; // Ò»ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ú²ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 
 	GPIO_SetBits(GPIOE, GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7); // 0x1110
 	delay_ms(1);
-	PE0_PE3_state = GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // ¶Á³öÁÐ
+	PE0_PE3_state = GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (PE0_PE3_state != 0xf)
 		return which_key(14, PE0_PE3_state);
 
 	GPIO_SetBits(GPIOE, GPIO_Pin_4);
 	GPIO_ResetBits(GPIOE, GPIO_Pin_5); // 0x1101
 	delay_ms(1);
-	PE0_PE3_state = GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // ¶Á³öÁÐ
+	PE0_PE3_state = GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (PE0_PE3_state != 0xf)
 		return which_key(13, PE0_PE3_state);
 
 	GPIO_SetBits(GPIOE, GPIO_Pin_5);
 	GPIO_ResetBits(GPIOE, GPIO_Pin_6); // 0x1011
 	delay_ms(1);
-	PE0_PE3_state = GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // ¶Á³öÁÐ
+	PE0_PE3_state = GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (PE0_PE3_state != 0xf)
 		return which_key(11,PE0_PE3_state);
 
 	GPIO_SetBits(GPIOE, GPIO_Pin_6);
 	GPIO_ResetBits(GPIOE, GPIO_Pin_7); // 0x0111
 	delay_ms(1);
-	PE0_PE3_state = GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // ¶Á³öÁÐ
+	PE0_PE3_state = GPIO_ReadInputData(GPIOE) & (GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3); // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	if (PE0_PE3_state != 0xf)
 		return which_key(7,PE0_PE3_state);
 
-	return -1; // ´íÎó
+	return (u8)-1; // ï¿½ï¿½ï¿½ï¿½
 }
 
-//********************ÊýÂë¹Ü*************************/
+//********************ï¿½ï¿½ï¿½ï¿½ï¿½*************************/
 int digit_map[17];
-// ³õÊ¼»¯ÊýÂë¹Ü
+int digit_pos = 0;
+int digit[4] = {0,1,2,3};
+// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void DIGIT_Init(void){
     GPIO_InitTypeDef GPIO_InitStructure;
     
     RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOC | RCC_APB2Periph_GPIOD, ENABLE);
     
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;       // ÍÆÍìÊä³ö
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;      // Êä³öËÙ¶È50MHz
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;       // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;      // ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½50MHz
     GPIO_Init(GPIOC, &GPIO_InitStructure);
     
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
                                  GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;       // ÍÆÍìÊä³ö
-    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;      // Êä³öËÙ¶È50MHz
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;       // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;      // ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½50MHz
     GPIO_Init(GPIOD, &GPIO_InitStructure);
     
     GPIO_SetBits(GPIOC, GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13);
     GPIO_SetBits(GPIOD, GPIO_Pin_0 | GPIO_Pin_1 | GPIO_Pin_2 | GPIO_Pin_3 |
                        GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
 
-	// ³õÊ¼»¯ÊýÂë¹Ü±àÂëÓ³Éä±í
+	// ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ü±ï¿½ï¿½ï¿½Ó³ï¿½ï¿½ï¿½
 	digit_map[0] = 192;
 	digit_map[1] = 249; 
 	digit_map[2] = 164;
@@ -242,14 +243,14 @@ void DIGIT_Init(void){
 	digit_map[13] = 161;
 	digit_map[14] = 134;
 	digit_map[15] = 142;
-	digit_map[16] = 127; // Êä³öµ¥µã£¬±íÊ¾³ö´í
+	digit_map[16] = 127; // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ã£¬ï¿½ï¿½Ê¾ï¿½ï¿½ï¿½ï¿½
 }
 
 void DIGIT_display(int digit,int position){
-	// ÏÈ¹Ø±ÕËùÓÐÎ»Ñ¡
+	// ï¿½È¹Ø±ï¿½ï¿½ï¿½ï¿½ï¿½Î»Ñ¡
     GPIO_SetBits(GPIOC, GPIO_Pin_10 | GPIO_Pin_11 | GPIO_Pin_12 | GPIO_Pin_13);
-	// ÉèÖÃ¶ÎÑ¡
+	// ï¿½ï¿½ï¿½Ã¶ï¿½Ñ¡
 	GPIO_Write(GPIOD, digit_map[digit == -1  ? 16 : digit] & 0xFF);
-	// ´ò¿ª¶ÔÓ¦Î»Ñ¡
+	// ï¿½ò¿ª¶ï¿½Ó¦Î»Ñ¡
 	GPIO_ResetBits(GPIOC, 1 << (10 + position));
 }

@@ -1,8 +1,9 @@
+#include "EXTI.h"
+
 #include "stm32f10x_exti.h"
 
-extern int input_key;
-extern bool input_key_flag;
-extern int key_map[16];
+int EXTI_input;
+bool EXTI_flag = 0;
 
 void EXTIX_Init(void)
 {
@@ -59,12 +60,12 @@ void update_input_key(int high,int low){
 	for (i=0; i<16; i++)
 		if (key_map[i] == x){
 			input_key = i;
-			input_key_flag = 1;
+			input_key_flag = true;
 			return;
 		}
 }
 
-void ResetPE4_7(){
+void ResetPE4_7(void){
 	GPIO_ResetBits(GPIOE, GPIO_Pin_4 | GPIO_Pin_5 | GPIO_Pin_6 | GPIO_Pin_7);
 }
 
@@ -111,15 +112,12 @@ void EXTI_KeyBoard_Scan(int input){
 	ResetPE4_7();
 }
 
-extern int EXTI_input;
-extern bool EXTI_flag;
-
 void EXTI0_IRQHandler(void)
 {
     if (EXTI_GetITStatus(EXTI_Line0) != RESET)
     {
         EXTI_input = GPIO_Pin_0;
-        EXTI_flag = 1;
+        EXTI_flag = true;
         EXTI_ClearITPendingBit(EXTI_Line0);
     }
 }
@@ -129,7 +127,7 @@ void EXTI1_IRQHandler(void)
     if (EXTI_GetITStatus(EXTI_Line1) != RESET)
     {
         EXTI_input = GPIO_Pin_1;
-        EXTI_flag = 1;
+        EXTI_flag = true;
         EXTI_ClearITPendingBit(EXTI_Line1);
     }
 }
@@ -139,7 +137,7 @@ void EXTI2_IRQHandler(void)
     if (EXTI_GetITStatus(EXTI_Line2) != RESET)
     {
         EXTI_input = GPIO_Pin_2;
-        EXTI_flag = 1;
+        EXTI_flag = true;
         EXTI_ClearITPendingBit(EXTI_Line2);
     }
 }
@@ -149,7 +147,7 @@ void EXTI3_IRQHandler(void)
     if (EXTI_GetITStatus(EXTI_Line3) != RESET)
     {
         EXTI_input = GPIO_Pin_3;
-        EXTI_flag = 1;
+        EXTI_flag = true;
         EXTI_ClearITPendingBit(EXTI_Line3);
     }
 }

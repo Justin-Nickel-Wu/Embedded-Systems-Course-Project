@@ -1,15 +1,14 @@
-//systick.c
+#include "systick.h"
+
 #include "stm32f10x.h"                  // Device header
 #include "stm32f10x_dma.h"
 #include "stm32f10x_exti.h"
 
 int TimeSecond = 0;
 int Time1msConunt = 0  ;
-
-
 volatile int time1ms ;
 
-void time_handle()
+void time_handle(void)
 {
 		Time1msConunt ++ ;
 		if ( Time1msConunt >= 1000)
@@ -18,10 +17,6 @@ void time_handle()
 			TimeSecond ++ ;
 		}
 }
-
-extern int digit_pos;
-extern int digit[4];
-extern void DIGIT_display(char digit,int position);
 
 void digit_display_switch(void)
 {
@@ -33,8 +28,6 @@ void SysTick_Handler(void)
 {
 	digit_display_switch();
 }
-
-#define digit_display_fps 60
 
 void systick_init(void)
 {
