@@ -34,6 +34,7 @@ extern void DIGIT_Init(void);
 extern void DIGIT_display(char digit,int position);
 extern void EXTIX_Init(void);
 extern void systick_init(void);
+extern void EXTI_KeyBoard_Scan(int input);
 
 extern int input_key;
 extern bool input_key_flag;
@@ -46,6 +47,8 @@ void BoardInit()
 
 int digit_pos = 0;
 int digit[4] = {0,1,2,3};
+int EXTI_input;
+bool EXTI_flag = 0;
 
 int main(void)
 {
@@ -60,6 +63,10 @@ int main(void)
 	systick_init();
 
 	while (1){
+    if (EXTI_flag){
+        EXTI_KeyBoard_Scan(EXTI_input);
+        EXTI_flag = 0;
+    }
     if (input_key_flag){
         digit[3] = digit[2];
         digit[2] = digit[1];
