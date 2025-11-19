@@ -335,7 +335,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>.\user;.\Stm32lib\CMSIS\Core\CM3;.\Stm32lib\STM32F10x_StdPeriph_Driver\inc</IncludePath>
+              <IncludePath>.\user;.\user\inc;.\Stm32lib\CMSIS\Core\CM3;.\Stm32lib\STM32F10x_StdPeriph_Driver\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
