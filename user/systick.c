@@ -1,4 +1,5 @@
 #include "systick.h"
+#include "UART.h"
 
 #include "stm32f10x.h"                  // Device header
 #include "stm32f10x_dma.h"
@@ -7,6 +8,10 @@
 int TimeSecond = 0;
 int Time1msConunt = 0  ;
 volatile int time1ms ;
+
+const int digit_switch_cnt_const =  1000 /  (digit_display_fps * 4);
+int digit_switch_cnt =  digit_switch_cnt_const;
+bool digit_switch_flag = false;
 
 void time_handle(void)
 {
@@ -26,7 +31,18 @@ void digit_display_switch(void)
 
 void SysTick_Handler(void)
 {
-	digit_display_switch();
+	digit_switch_cnt--;
+  if (digit_switch_cnt <= 0)
+  {
+	  digit_switch_cnt = digit_switch_cnt_const;
+    digit_switch_flag = true;
+  }
+
+  RecvTimeOver--;
+  if (RecvTimeOver <= 0){
+      RecvTimeOver = 0;
+      FrameFlag = 1;
+  }
 }
 
 void systick_init(void)
@@ -34,7 +50,7 @@ void systick_init(void)
     RCC_ClocksTypeDef RCC_Clocks;
 	
     RCC_GetClocksFreq(&RCC_Clocks);
-    SysTick_Config(RCC_Clocks.HCLK_Frequency / digit_display_fps / 4); // 控制的是单个数码管的频率，所以还要除以4
+    SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000); // 1ms中断一次
     /* Configure Systick clock source as HCLK */
     SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK);
 }

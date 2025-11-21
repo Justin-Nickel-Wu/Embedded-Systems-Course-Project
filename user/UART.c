@@ -9,7 +9,7 @@
 #include <stm32f10x_usart.h>
 #include "stdio.h"
 #include "stdint.h"
-
+#include "UART.h"
 
 void RS232_Configuration(void)
 {
@@ -92,19 +92,21 @@ u8 USART_Txbuf[USART_BUF_LEN];     //接收缓冲,最大USART_REC_LEN个字节.
 u16 RXPos=0;
 u16 FrameFlag = 0;
 u16 RecvTimeOver=0;
+u16 RecieceFlag = 0;
 u16 SendPos,SendBufLen;
 
 void USART1_IRQHandler(void)  
 {
 		if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)  //接收中断(
 		{
+			RecieceFlag = 1;
 			if(RXPos<=USART_BUF_LEN)//缓冲区未满
 			{
 				USART_Rxbuf[RXPos]=USART_ReceiveData(USART1);//(USART1->DR);	//读取接收到的数据 ;
 				RXPos++;
 			}
 			RecvTimeOver = 10 ;  //每次接收到数据，超时检测时间10ms
-    } 	
+        } 	
 		
 		if (USART_GetITStatus(USART1, USART_IT_TC) != RESET) 
 		{
@@ -119,24 +121,32 @@ void USART1_IRQHandler(void)
 }
 
 
-void RS232_test()
+void RS232_test(void)
 {
+		u16 i;
 		if ( FrameFlag != 0 )
 		{
+
 				//对接收到的数据进行处理
 				//可以定义发送数据帧，并启动发送。如果初始化的时候开启USART_IT_TC中断，则没发送一个字节进入中断一次
 				//通过进入中断的计数器，确定该发送发送帧中的哪个字节，直到发完为止
+				RecieceFlag = 0;
 				FrameFlag = 0 ;
+
+				SendBufLen = RXPos;
+				for (i = 0; i < RXPos; i ++ ){
+					USART_Txbuf[i] = USART_Rxbuf[i];
+				}
+				SendPos = 0 ;
+				USART_SendData(USART1, USART_Txbuf[0]);
+        		SendPos = 1;
+
 				RXPos = 0 ;
 		}
-		
-		
-	
-
 }
 
 
-void uart1_init()	
+void uart1_init(void)	
 {
 	RS232_Configuration();		
 	NVIC_Configuration();

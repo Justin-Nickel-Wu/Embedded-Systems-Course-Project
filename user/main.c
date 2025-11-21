@@ -28,6 +28,7 @@
 #include "EXTI.h"
 #include "GPIO.h"
 #include "systick.h"
+#include "UART.h"
 
 void BoardInit()
 {
@@ -44,12 +45,19 @@ int main(void)
 	DIGIT_Init();
 	EXTIX_Init();
 	systick_init();
+	uart1_init();
 
 	while (1){
+    if (digit_switch_flag){
+        digit_switch_flag = false;
+        digit_display_switch();
+    }
+
     if (EXTI_flag){
         EXTI_KeyBoard_Scan(EXTI_input);
         EXTI_flag = 0;
     }
+
     if (input_key_flag){
         digit[3] = digit[2];
         digit[2] = digit[1];
@@ -57,6 +65,7 @@ int main(void)
         digit[0] = input_key;
         input_key_flag = 0;
     }
+    RS232_test();
 	}
 	// return 1;
 }
