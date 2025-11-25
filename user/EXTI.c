@@ -1,6 +1,6 @@
 #include "EXTI.h"
 
-#include "stm32f10x_exti.h"
+#include "stm32f10x_conf.h"
 
 int EXTI_input;
 bool EXTI_flag = 0;

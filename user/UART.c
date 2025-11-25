@@ -6,7 +6,7 @@
 ע    �⣺
 ***********************************************************************/
 #include "stm32f10x.h"
-#include <stm32f10x_usart.h>
+#include "stm32f10x_conf.h"
 #include "stdio.h"
 #include "stdint.h"
 #include "UART.h"

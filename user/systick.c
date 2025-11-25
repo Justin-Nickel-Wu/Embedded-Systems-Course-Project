@@ -1,9 +1,7 @@
 #include "systick.h"
 #include "UART.h"
 
-#include "stm32f10x.h"                  // Device header
-#include "stm32f10x_dma.h"
-#include "stm32f10x_exti.h"
+#include "stm32f10x_conf.h"
 
 int TimeSecond = 0;
 int Time1msConunt = 0  ;
