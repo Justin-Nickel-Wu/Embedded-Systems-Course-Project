@@ -34,3 +34,4 @@
 # Build directories (if you want)
 Objects/
 Listings/
+.vscode/
