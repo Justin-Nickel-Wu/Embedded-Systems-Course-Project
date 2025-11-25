@@ -1,6 +1,8 @@
 #ifndef __GPIO_H__
 #define __GPIO_H__
 
+#include  <stdbool.h>
+
 void LED_Init(void);
 void Delay(unsigned int nCount);
 void LED_Turn(int id);
