@@ -1,9 +1,6 @@
 #ifndef __SYSTICK_H__
 #define __SYSTICK_H__
 
-#include "GPIO.h"
-#include "stm32f10x.h"
-
 #define digit_display_fps 60  // 数码管刷新频率
 
 extern int TimeSecond;

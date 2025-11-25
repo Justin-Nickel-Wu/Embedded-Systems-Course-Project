@@ -1,10 +1,6 @@
 #ifndef __EXTI_H__
 #define __EXTI_H__
 
-#include "GPIO.h"
-#include "sys.h"
-#include <stdbool.h>
-
 extern int EXTI_input;
 extern bool EXTI_flag;
 

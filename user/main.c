@@ -24,11 +24,13 @@
 
 
 /* Includes ------------------------------------------------------------------*/
-#include "stm32f10x.h"
+
 #include "EXTI.h"
 #include "GPIO.h"
-#include "systick.h"
 #include "UART.h"
+#include "systick.h"
+#include "stdbool.h"
+#include "stm32f10x_conf.h"
 
 void BoardInit()
 {

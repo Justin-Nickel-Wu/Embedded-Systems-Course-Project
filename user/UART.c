@@ -1,23 +1,20 @@
 /***********************************************************************
-ÎÄ¼þÃû³Æ£ºLED.C
-¹¦    ÄÜ£ºled  IO³õÊ¼»¯
-±àÐ´Ê±¼ä£º2013.4.25
-±à Ð´ ÈË£º
-×¢    Òâ£º
+ï¿½Ä¼ï¿½ï¿½ï¿½ï¿½Æ£ï¿½LED.C
+ï¿½ï¿½    ï¿½Ü£ï¿½led  IOï¿½ï¿½Ê¼ï¿½ï¿½
+ï¿½ï¿½Ð´Ê±ï¿½ä£º2013.4.25
+ï¿½ï¿½ Ð´ ï¿½Ë£ï¿½
+×¢    ï¿½â£º
 ***********************************************************************/
-#include "stm32f10x.h"
-#include <stm32f10x_usart.h>
-#include "stdio.h"
-#include "stdint.h"
 #include "UART.h"
+#include "stm32f10x_conf.h"
 
 void RS232_Configuration(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
  	USART_InitTypeDef USART_InitStructure; 
-	//Òý½ÅÊ±ÖÓ
+	//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	//´®¿ÚÊ±ÖÓ
+	//ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½
 	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 
 
@@ -34,7 +31,7 @@ void RS232_Configuration(void)
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
   GPIO_Init(GPIOA, &GPIO_InitStructure);
 	
-		//´®¿Ú1³õÊ¼»¯
+		//ï¿½ï¿½ï¿½ï¿½1ï¿½ï¿½Ê¼ï¿½ï¿½
 	USART_InitStructure.USART_BaudRate = 115200;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
 	USART_InitStructure.USART_StopBits = USART_StopBits_1;
@@ -44,8 +41,8 @@ void RS232_Configuration(void)
 	USART_Init(USART1, &USART_InitStructure);
 
 	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-	USART_ITConfig(USART1, USART_IT_TC, ENABLE);//·¢ËÍÍê³ÉÖÐ¶Ï
-	USART_ClearITPendingBit(USART1, USART_IT_TC);//Çå³ýÖÐ¶ÏTCÎ»
+	USART_ITConfig(USART1, USART_IT_TC, ENABLE);//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½
+	USART_ClearITPendingBit(USART1, USART_IT_TC);//ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½TCÎ»
 	USART_Cmd(USART1, ENABLE);
 	
 }
@@ -67,7 +64,7 @@ void NVIC_Configuration(void)
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;	
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&NVIC_InitStructure);
-	//Èç¹û»¹ÓÐÆäËûÖÐ¶Ï£¬°´ÕÕÏÂÃæÀàËÆµÄÔö¼Ó¼´¿É
+	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶Ï£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æµï¿½ï¿½ï¿½ï¿½Ó¼ï¿½ï¿½ï¿½
 //	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;	  
 //	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
 //	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;	
@@ -75,20 +72,20 @@ void NVIC_Configuration(void)
 //	NVIC_Init(&NVIC_InitStructure); 
 }
 /***********************************************************************
-º¯ÊýÃû³Æ£ºvoid USART1_IRQHandler(void) 
-¹¦    ÄÜ£ºÍê³ÉSCIµÄÊý¾ÝµÄ½ÓÊÕ£¬²¢×ö±êÊ¶
-ÊäÈë²ÎÊý£º
-Êä³ö²ÎÊý£º
-±àÐ´Ê±¼ä£º2012.11.22
-±à Ð´ ÈË£º
-×¢    Òâ  RS485ÓÃµÄÊÇUSART3.
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Æ£ï¿½void USART1_IRQHandler(void) 
+ï¿½ï¿½    ï¿½Ü£ï¿½ï¿½ï¿½ï¿½SCIï¿½ï¿½ï¿½ï¿½ï¿½ÝµÄ½ï¿½ï¿½Õ£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¶
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+ï¿½ï¿½Ð´Ê±ï¿½ä£º2012.11.22
+ï¿½ï¿½ Ð´ ï¿½Ë£ï¿½
+×¢    ï¿½ï¿½  RS485ï¿½Ãµï¿½ï¿½ï¿½USART3.
 ***********************************************************************/
 
 
 u8 RS232InData;
-#define USART_BUF_LEN  			200  	//¶¨Òå×î´ó½ÓÊÕ×Ö½ÚÊý 200
-u8 USART_Rxbuf[USART_BUF_LEN];     //½ÓÊÕ»º³å,×î´óUSART_REC_LEN¸ö×Ö½Ú.
-u8 USART_Txbuf[USART_BUF_LEN];     //½ÓÊÕ»º³å,×î´óUSART_REC_LEN¸ö×Ö½Ú.
+#define USART_BUF_LEN  			200  	//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö½ï¿½ï¿½ï¿½ 200
+u8 USART_Rxbuf[USART_BUF_LEN];     //ï¿½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½USART_REC_LENï¿½ï¿½ï¿½Ö½ï¿½.
+u8 USART_Txbuf[USART_BUF_LEN];     //ï¿½ï¿½ï¿½Õ»ï¿½ï¿½ï¿½,ï¿½ï¿½ï¿½USART_REC_LENï¿½ï¿½ï¿½Ö½ï¿½.
 u16 RXPos=0;
 u16 FrameFlag = 0;
 u16 RecvTimeOver=0;
@@ -97,15 +94,15 @@ u16 SendPos,SendBufLen;
 
 void USART1_IRQHandler(void)  
 {
-		if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)  //½ÓÊÕÖÐ¶Ï(
+		if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)  //ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½(
 		{
 			RecieceFlag = 1;
-			if(RXPos<=USART_BUF_LEN)//»º³åÇøÎ´Âú
+			if(RXPos<=USART_BUF_LEN)//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Î´ï¿½ï¿½
 			{
-				USART_Rxbuf[RXPos]=USART_ReceiveData(USART1);//(USART1->DR);	//¶ÁÈ¡½ÓÊÕµ½µÄÊý¾Ý ;
+				USART_Rxbuf[RXPos]=USART_ReceiveData(USART1);//(USART1->DR);	//ï¿½ï¿½È¡ï¿½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ;
 				RXPos++;
 			}
-			RecvTimeOver = 10 ;  //Ã¿´Î½ÓÊÕµ½Êý¾Ý£¬³¬Ê±¼ì²âÊ±¼ä10ms
+			RecvTimeOver = 10 ;  //Ã¿ï¿½Î½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½Ý£ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ê±ï¿½ï¿½10ms
         } 	
 		
 		if (USART_GetITStatus(USART1, USART_IT_TC) != RESET) 
@@ -127,9 +124,9 @@ void RS232_test(void)
 		if ( FrameFlag != 0 )
 		{
 
-				//¶Ô½ÓÊÕµ½µÄÊý¾Ý½øÐÐ´¦Àí
-				//¿ÉÒÔ¶¨Òå·¢ËÍÊý¾ÝÖ¡£¬²¢Æô¶¯·¢ËÍ¡£Èç¹û³õÊ¼»¯µÄÊ±ºò¿ªÆôUSART_IT_TCÖÐ¶Ï£¬ÔòÃ»·¢ËÍÒ»¸ö×Ö½Ú½øÈëÖÐ¶ÏÒ»´Î
-				//Í¨¹ý½øÈëÖÐ¶ÏµÄ¼ÆÊýÆ÷£¬È·¶¨¸Ã·¢ËÍ·¢ËÍÖ¡ÖÐµÄÄÄ¸ö×Ö½Ú£¬Ö±µ½·¢ÍêÎªÖ¹
+				//ï¿½Ô½ï¿½ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ý½ï¿½ï¿½Ð´ï¿½ï¿½ï¿½
+				//ï¿½ï¿½ï¿½Ô¶ï¿½ï¿½å·¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½USART_IT_TCï¿½Ð¶Ï£ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½Ò»ï¿½ï¿½ï¿½Ö½Ú½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½Ò»ï¿½ï¿½
+				//Í¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ÏµÄ¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½È·ï¿½ï¿½ï¿½Ã·ï¿½ï¿½Í·ï¿½ï¿½ï¿½Ö¡ï¿½Ðµï¿½ï¿½Ä¸ï¿½ï¿½Ö½Ú£ï¿½Ö±ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ÎªÖ¹
 				RecieceFlag = 0;
 				FrameFlag = 0 ;
 

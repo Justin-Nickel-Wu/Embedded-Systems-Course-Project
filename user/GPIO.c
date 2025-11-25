@@ -6,6 +6,8 @@
 ע    �⣺���´�������ο�
 ***********************************************************************/
 #include "GPIO.h"
+#include <stdbool.h>
+#include "stm32f10x_conf.h"
 
 #define RCC_APB2ENR         (*((volatile unsigned int*)0x40021018))   // APB2 ����ʱ��ʹ�ܼĴ���
 #define GPIOE_CRH           (*((volatile unsigned int*)0x40011804))   // �˿����ø߼Ĵ���
