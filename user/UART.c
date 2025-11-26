@@ -96,29 +96,24 @@ u16 RecvTimeOver=0;
 u16 RecieceFlag = 0;
 u16 SendPos, SendBufLen;
 
-void USART1_IRQHandler(void)  
-{
-		if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)  //接收中断(
-		{
-			RecieceFlag = 1;
-			if(RXPos<=USART_BUF_LEN)//缓冲区未满
-			{
-				USART_Rxbuf[RXPos]=USART_ReceiveData(USART1);//(USART1->DR);	//读取接收到的数据 ;
-				RXPos++;
-			}
-			RecvTimeOver = 10 ;  //每次接收到数据，超时检测时间10ms
-        } 	
-		
-		if (USART_GetITStatus(USART1, USART_IT_TC) != RESET) 
-		{
-				USART_ClearITPendingBit(USART1, USART_IT_TC);           /* Clear the USART transmit interrupt       */
-			  if ( SendPos < SendBufLen )
-				{
-					USART_SendData(USART1,USART_Txbuf[SendPos]);
-					SendPos ++ ;
-				}
-
-		}	
+void USART1_IRQHandler(void)  {
+	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET){ //接收中断
+		RecieceFlag = 1;
+		FrameFlag = 0;
+		if(RXPos<=USART_BUF_LEN) { // 缓冲区未满
+			USART_Rxbuf[RXPos]=USART_ReceiveData(USART1); // 读取接收到的数据 ;
+			RXPos++;
+		}
+		RecvTimeOver = 10; //每次接收到数据，超时检测时间10ms
+	} 	
+	
+	if (USART_GetITStatus(USART1, USART_IT_TC) != RESET) { // 发送中断
+		USART_ClearITPendingBit(USART1, USART_IT_TC);
+		if (SendPos < SendBufLen){
+			USART_SendData(USART1,USART_Txbuf[SendPos]);
+			SendPos++ ;
+		}
+	}	
 }
 
 u16 Modbus_CRC16(u8 *buf, u16 len)
@@ -175,7 +170,7 @@ u8 RS232_test(void)
 {
 		u16 i , crc, reg_addr, reg_num, temp, data_len;
 		u8 crc_H, crc_L;
-		if ( FrameFlag != 0 )
+		if (RecieceFlag != 0 && FrameFlag != 0)
 		{
 
 			//对接收到的数据进行处理
@@ -224,41 +219,41 @@ u8 RS232_test(void)
 				return 1;
 			}
 
-			if (USART_Rxbuf[1] == 0x10) { // 处理写
-				reg_addr = (USART_Rxbuf[2] << 8) + USART_Rxbuf[3];
-				reg_num = (USART_Rxbuf[4] << 8) + USART_Rxbuf[5];
-				data_len = USART_Rxbuf[6];
+if (USART_Rxbuf[1] == 0x10) { // 处理写
+	reg_addr = (USART_Rxbuf[2] << 8) + USART_Rxbuf[3];
+	reg_num = (USART_Rxbuf[4] << 8) + USART_Rxbuf[5];
+	data_len = USART_Rxbuf[6];
 
-				if (reg_addr + reg_num - 1 >= 4){
-					Err(0x10, 0x02);
-					return 0;
-				}
+	if (reg_addr + reg_num - 1 >= 4){
+		Err(0x10, 0x02);
+		return 0;
+	}
 
-				if (data_len != reg_num * 2){
-					Err(0x10, 0x03);
-					return 0;
-				}
+	if (data_len != reg_num * 2){
+		Err(0x10, 0x03);
+		return 0;
+	}
 
-				for (i = 0; i < reg_num; i++) {
-					temp = (USART_Rxbuf[7 + (2 * i)] << 8) + (USART_Rxbuf[7 + (2 * i + 1)]);
-					if (temp > 15) {
-						Err(0x10, 0x03);
-						return 0;
-					}
-					digit[reg_addr + i] = temp;
-				}
-				
-				SendBufLen = 6;
-				USART_Txbuf[0] = DeviceID;
-				USART_Txbuf[1] = 0x10;
-				USART_Txbuf[2] = USART_Rxbuf[2];
-				USART_Txbuf[3] = USART_Rxbuf[3];
-				USART_Txbuf[4] = USART_Rxbuf[4];
-				USART_Txbuf[5] = USART_Rxbuf[5];
+	for (i = 0; i < reg_num; i++) {
+		temp = (USART_Rxbuf[7 + (2 * i)] << 8) + (USART_Rxbuf[7 + (2 * i + 1)]);
+		if (temp > 15) {
+			Err(0x10, 0x03);
+			return 0;
+		}
+		digit[reg_addr + i] = temp;
+	}
+	
+	SendBufLen = 6;
+	USART_Txbuf[0] = DeviceID;
+	USART_Txbuf[1] = 0x10;
+	USART_Txbuf[2] = USART_Rxbuf[2];
+	USART_Txbuf[3] = USART_Rxbuf[3];
+	USART_Txbuf[4] = USART_Rxbuf[4];
+	USART_Txbuf[5] = USART_Rxbuf[5];
 
-				Send();				
-				return 1;
-			}
+	Send();				
+	return 1;
+}
 			
 			Err(USART_Txbuf[1], 0x01);
 			return 0;

@@ -14,7 +14,6 @@
 *.obj
 *.dep
 *.iex
-*.docx
 
 # Listing and debug
 *.sct
@@ -35,3 +34,5 @@
 Objects/
 Listings/
 .vscode/
+
+.DS_Store
