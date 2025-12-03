@@ -36,3 +36,4 @@ Listings/
 .vscode/
 
 .DS_Store
+.clang-format
