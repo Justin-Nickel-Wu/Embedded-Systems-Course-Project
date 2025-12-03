@@ -1,9 +1,9 @@
 /***********************************************************************
-ÎÄ¼şÃû³Æ£ºLED.C
-¹¦    ÄÜ£ºled  IO³õÊ¼»¯
-±àĞ´Ê±¼ä£º2013.4.25
-±à Ğ´ ÈË£º
-×¢    Òâ£º
+æ–‡ä»¶åç§°ï¼šLED.C
+åŠŸ    èƒ½ï¼šled  IOåˆå§‹åŒ–
+ç¼–å†™æ—¶é—´ï¼š2013.4.25
+ç¼– å†™ äººï¼š
+æ³¨    æ„ï¼š
 ***********************************************************************/
 #include "stm32f10x.h"
 #include "stm32f10x_conf.h"
@@ -12,130 +12,120 @@
 #include "UART.h"
 #include "GPIO.h"
 
-void RS232_Configuration(void)
-{
-	GPIO_InitTypeDef GPIO_InitStructure;
- 	USART_InitTypeDef USART_InitStructure; 
-	//Òı½ÅÊ±ÖÓ
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	//´®¿ÚÊ±ÖÓ
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+void RS232_Configuration(void) {
+    GPIO_InitTypeDef GPIO_InitStructure;
+    USART_InitTypeDef USART_InitStructure;
+    // å¼•è„šæ—¶é’Ÿ
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    // ä¸²å£æ—¶é’Ÿ
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 
+    /*
+     *  USART1_TX -> PA9 , USART1_RX ->	PA10
+     */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  /*
-  *  USART1_TX -> PA9 , USART1_RX ->	PA10
-  */				
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;	         
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; 
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-  GPIO_Init(GPIOA, &GPIO_InitStructure);		   
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;	        
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;  
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-	
-		//´®¿Ú1³õÊ¼»¯
-	USART_InitStructure.USART_BaudRate = 115200;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	USART_Init(USART1, &USART_InitStructure);
+    // ä¸²å£1åˆå§‹åŒ–
+    USART_InitStructure.USART_BaudRate = 115200;
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    USART_InitStructure.USART_Parity = USART_Parity_No;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    USART_Init(USART1, &USART_InitStructure);
 
-	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-	USART_ITConfig(USART1, USART_IT_TC, ENABLE);//·¢ËÍÍê³ÉÖĞ¶Ï
-	USART_ClearITPendingBit(USART1, USART_IT_TC);//Çå³ıÖĞ¶ÏTCÎ»
-	USART_Cmd(USART1, ENABLE);
-	
+    USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+    USART_ITConfig(USART1, USART_IT_TC, ENABLE);  // å‘é€å®Œæˆä¸­æ–­
+    USART_ClearITPendingBit(USART1, USART_IT_TC); // æ¸…é™¤ä¸­æ–­TCä½
+    USART_Cmd(USART1, ENABLE);
 }
 
-void NVIC_Configuration(void)
-{
-  NVIC_InitTypeDef   NVIC_InitStructure;
+void NVIC_Configuration(void) {
+    NVIC_InitTypeDef NVIC_InitStructure;
 
-  /* Set the Vector Table base location at 0x08000000 */
-  NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x0);
+    /* Set the Vector Table base location at 0x08000000 */
+    NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x0);
 
-  /* 2 bit for pre-emption priority, 2 bits for subpriority */
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); 
-  
-  /* Enable the Ethernet global Interrupt */
-  
-	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;	  
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;	
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-	//Èç¹û»¹ÓĞÆäËûÖĞ¶Ï£¬°´ÕÕÏÂÃæÀàËÆµÄÔö¼Ó¼´¿É
-//	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;	  
-//	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
-//	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;	
-//	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//	NVIC_Init(&NVIC_InitStructure); 
+    /* 2 bit for pre-emption priority, 2 bits for subpriority */
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+
+    /* Enable the Ethernet global Interrupt */
+
+    NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+    // å¦‚æœè¿˜æœ‰å…¶ä»–ä¸­æ–­ï¼ŒæŒ‰ç…§ä¸‹é¢ç±»ä¼¼çš„å¢åŠ å³å¯
+    //	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
+    //	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
+    //	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    //	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    //	NVIC_Init(&NVIC_InitStructure);
 }
 /***********************************************************************
-º¯ÊıÃû³Æ£ºvoid USART1_IRQHandler(void) 
-¹¦    ÄÜ£ºÍê³ÉSCIµÄÊı¾İµÄ½ÓÊÕ£¬²¢×ö±êÊ¶
-ÊäÈë²ÎÊı£º
-Êä³ö²ÎÊı£º
-±àĞ´Ê±¼ä£º2012.11.22
-±à Ğ´ ÈË£º
-×¢    Òâ  RS485ÓÃµÄÊÇUSART3.
+å‡½æ•°åç§°ï¼švoid USART1_IRQHandler(void)
+åŠŸ    èƒ½ï¼šå®ŒæˆSCIçš„æ•°æ®çš„æ¥æ”¶ï¼Œå¹¶åšæ ‡è¯†
+è¾“å…¥å‚æ•°ï¼š
+è¾“å‡ºå‚æ•°ï¼š
+ç¼–å†™æ—¶é—´ï¼š2012.11.22
+ç¼– å†™ äººï¼š
+æ³¨    æ„  RS485ç”¨çš„æ˜¯USART3.
 ***********************************************************************/
 #define DeviceID 0x01
 
 u8 RS232InData;
-#define USART_BUF_LEN  			200  	//¶¨Òå×î´ó½ÓÊÕ×Ö½ÚÊı 200
-u8 USART_Rxbuf[USART_BUF_LEN];     //½ÓÊÕ»º³å,×î´óUSART_REC_LEN¸ö×Ö½Ú.
-u8 USART_Txbuf[USART_BUF_LEN];     //½ÓÊÕ»º³å,×î´óUSART_REC_LEN¸ö×Ö½Ú.
-u16 RXPos=0;
+#define USART_BUF_LEN 200      // å®šä¹‰æœ€å¤§æ¥æ”¶å­—èŠ‚æ•° 200
+u8 USART_Rxbuf[USART_BUF_LEN]; // æ¥æ”¶ç¼“å†²,æœ€å¤§USART_REC_LENä¸ªå­—èŠ‚.
+u8 USART_Txbuf[USART_BUF_LEN]; // æ¥æ”¶ç¼“å†²,æœ€å¤§USART_REC_LENä¸ªå­—èŠ‚.
+u16 RXPos = 0;
 u16 FrameFlag = 0;
-u16 RecvTimeOver=0;
+u16 RecvTimeOver = 0;
 u16 RecieceFlag = 0;
 u16 SendPos, SendBufLen;
 
-void USART1_IRQHandler(void)  {
-	if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET){ //½ÓÊÕÖĞ¶Ï
-		RecieceFlag = 1;
-		FrameFlag = 0;
-		if(RXPos<=USART_BUF_LEN) { // »º³åÇøÎ´Âú
-			USART_Rxbuf[RXPos]=USART_ReceiveData(USART1); // ¶ÁÈ¡½ÓÊÕµ½µÄÊı¾İ ;
-			RXPos++;
-		}
-		RecvTimeOver = 10; //Ã¿´Î½ÓÊÕµ½Êı¾İ£¬³¬Ê±¼ì²âÊ±¼ä10ms
-	} 	
-	
-	if (USART_GetITStatus(USART1, USART_IT_TC) != RESET) { // ·¢ËÍÖĞ¶Ï
-		USART_ClearITPendingBit(USART1, USART_IT_TC);
-		if (SendPos < SendBufLen){
-			USART_SendData(USART1,USART_Txbuf[SendPos]);
-			SendPos++ ;
-		}
-	}	
+void USART1_IRQHandler(void) {
+    if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) { // æ¥æ”¶ä¸­æ–­
+        RecieceFlag = 1;
+        FrameFlag = 0;
+        if (RXPos <= USART_BUF_LEN) {                       // ç¼“å†²åŒºæœªæ»¡
+            USART_Rxbuf[RXPos] = USART_ReceiveData(USART1); // è¯»å–æ¥æ”¶åˆ°çš„æ•°æ® ;
+            RXPos++;
+        }
+        RecvTimeOver = 10; // æ¯æ¬¡æ¥æ”¶åˆ°æ•°æ®ï¼Œè¶…æ—¶æ£€æµ‹æ—¶é—´10ms
+    }
+
+    if (USART_GetITStatus(USART1, USART_IT_TC) != RESET) { // å‘é€ä¸­æ–­
+        USART_ClearITPendingBit(USART1, USART_IT_TC);
+        if (SendPos < SendBufLen) {
+            USART_SendData(USART1, USART_Txbuf[SendPos]);
+            SendPos++;
+        }
+    }
 }
 
-u16 Modbus_CRC16(u8 *buf, u16 len)
-{
-    u16 crc = 0xFFFF;   // ³õÊ¼Öµ
-	u16 pos;
-	int i;
+u16 Modbus_CRC16(u8 *buf, u16 len) {
+    u16 crc = 0xFFFF; // åˆå§‹å€¼
+    u16 pos;
+    int i;
 
-    for (pos = 0; pos < len; pos++)
-    {
-        crc ^= buf[pos];     // Óëµ±Ç°×Ö½ÚÒì»ò
+    for (pos = 0; pos < len; pos++) {
+        crc ^= buf[pos]; // ä¸å½“å‰å­—èŠ‚å¼‚æˆ–
 
-        for (i = 0; i < 8; i++)
-        {
-            if (crc & 0x0001)
-            {
-                crc >>= 1;        // ÓÒÒÆÒ»Î»
-                crc ^= 0xA001;    // Òì»ò¶àÏîÊ½
-            }
-            else
-            {
-                crc >>= 1;        // ÓÒÒÆÒ»Î»
+        for (i = 0; i < 8; i++) {
+            if (crc & 0x0001) {
+                crc >>= 1;     // å³ç§»ä¸€ä½
+                crc ^= 0xA001; // å¼‚æˆ–å¤šé¡¹å¼
+            } else {
+                crc >>= 1; // å³ç§»ä¸€ä½
             }
         }
     }
@@ -143,139 +133,133 @@ u16 Modbus_CRC16(u8 *buf, u16 len)
 }
 
 void Err(u8 func, u8 info) {
-	SendBufLen = 0;
-	USART_Txbuf[SendBufLen++] = DeviceID;
-	USART_Txbuf[SendBufLen++] = func + 0x80;
-	USART_Txbuf[SendBufLen++] = info;
+    SendBufLen = 0;
+    USART_Txbuf[SendBufLen++] = DeviceID;
+    USART_Txbuf[SendBufLen++] = func + 0x80;
+    USART_Txbuf[SendBufLen++] = info;
 
-	Send();
+    Send();
 }
 
 void Send(void) {
-	u16 crc;
-	u8 crc_H, crc_L;
-	crc = Modbus_CRC16(USART_Txbuf, SendBufLen);
-	crc_L = crc & 0xFF;
-	crc_H = (crc >> 8) & 0xFF;
+    u16 crc;
+    u8 crc_H, crc_L;
+    crc = Modbus_CRC16(USART_Txbuf, SendBufLen);
+    crc_L = crc & 0xFF;
+    crc_H = (crc >> 8) & 0xFF;
 
-	USART_Txbuf[SendBufLen++] = crc_L;
-	USART_Txbuf[SendBufLen++] = crc_H;
-	
-	SendPos = 0;
-	USART_SendData(USART1, USART_Txbuf[0]);
-	SendPos = 1;
-} 
+    USART_Txbuf[SendBufLen++] = crc_L;
+    USART_Txbuf[SendBufLen++] = crc_H;
 
-u8 RS232_test(void)
-{
-		u16 i , crc, reg_addr, reg_num, temp, data_len;
-		u8 crc_H, crc_L;
-		if (RecieceFlag != 0 && FrameFlag != 0)
-		{
-
-			//¶Ô½ÓÊÕµ½µÄÊı¾İ½øĞĞ´¦Àí
-			//¿ÉÒÔ¶¨Òå·¢ËÍÊı¾İÖ¡£¬²¢Æô¶¯·¢ËÍ¡£Èç¹û³õÊ¼»¯µÄÊ±ºò¿ªÆôUSART_IT_TCÖĞ¶Ï£¬ÔòÃ»·¢ËÍÒ»¸ö×Ö½Ú½øÈëÖĞ¶ÏÒ»´Î
-			//Í¨¹ı½øÈëÖĞ¶ÏµÄ¼ÆÊıÆ÷£¬È·¶¨¸Ã·¢ËÍ·¢ËÍÖ¡ÖĞµÄÄÄ¸ö×Ö½Ú£¬Ö±µ½·¢ÍêÎªÖ¹
-			RecieceFlag = 0;
-			FrameFlag = 0 ;
-			crc = Modbus_CRC16(USART_Rxbuf, RXPos - 2);
-			crc_L = crc & 0xFF;
-			crc_H = (crc >> 8) & 0xFF;
-			
-			if ((crc_L != USART_Rxbuf[RXPos - 2 ]) || (crc_H != USART_Rxbuf[RXPos - 1])) {
-				//CRCĞ£Ñé´íÎó
-				Err(USART_Rxbuf[1], 0x03);
-				return 0;
-			}
-
-			RXPos = 0;
-
-			if (USART_Rxbuf[0] != DeviceID) {
-				Err(USART_Rxbuf[1], 0x04);
-				return 0;
-			}
-
-			if (USART_Rxbuf[1] == 0x03) { // ´¦Àí¶Á
-				reg_addr = (USART_Rxbuf[2] << 8) + USART_Rxbuf[3];
-				reg_num = (USART_Rxbuf[4] << 8) + USART_Rxbuf[5];
-
-				if (reg_addr + reg_num - 1 >= 4){ // ¶ÁÔ½½ç
-					Err(0x03, 0x02);
-					return 0;
-				}
-					
-				SendBufLen = 0;
-				USART_Txbuf[SendBufLen++] = DeviceID;
-				USART_Txbuf[SendBufLen++] = 0x03;
-				USART_Txbuf[SendBufLen++] = 0x02 * reg_num; // ×Ö½ÚÊı
-
-				for (i = reg_addr; i < reg_addr + reg_num; i++) {
-					temp = digit[i] & 0xFFFF;
-					USART_Txbuf[SendBufLen++] = temp >> 8;
-					USART_Txbuf[SendBufLen++] = temp & 0xFF;
-				}
-
-				Send();
-				return 1;
-			}
-
-if (USART_Rxbuf[1] == 0x10) { // ´¦ÀíĞ´
-	reg_addr = (USART_Rxbuf[2] << 8) + USART_Rxbuf[3];
-	reg_num = (USART_Rxbuf[4] << 8) + USART_Rxbuf[5];
-	data_len = USART_Rxbuf[6];
-
-	if (reg_addr + reg_num - 1 >= 4){
-		Err(0x10, 0x02);
-		return 0;
-	}
-
-	if (data_len != reg_num * 2){
-		Err(0x10, 0x03);
-		return 0;
-	}
-
-	for (i = 0; i < reg_num; i++) {
-		temp = (USART_Rxbuf[7 + (2 * i)] << 8) + (USART_Rxbuf[7 + (2 * i + 1)]);
-		if (temp > 15) {
-			Err(0x10, 0x03);
-			return 0;
-		}
-		digit[reg_addr + i] = temp;
-	}
-	
-	SendBufLen = 6;
-	USART_Txbuf[0] = DeviceID;
-	USART_Txbuf[1] = 0x10;
-	USART_Txbuf[2] = USART_Rxbuf[2];
-	USART_Txbuf[3] = USART_Rxbuf[3];
-	USART_Txbuf[4] = USART_Rxbuf[4];
-	USART_Txbuf[5] = USART_Rxbuf[5];
-
-	Send();				
-	return 1;
-}
-			
-			Err(USART_Txbuf[1], 0x01);
-			return 0;
-			// USART_Txbuf[0] = crc & 0xFF;
-			// USART_Txbuf[1] = (crc >> 8) & 0xFF;
-			// SendBufLen = 2;
-			// SendBufLen = RXPos;
-			// for (i = 0; i < RXPos; i ++ ){
-			// 	USART_Txbuf[i] = USART_Rxbuf[i];
-			// }
-
-			// SendPos = 0 ;
-			// USART_SendData(USART1, USART_Txbuf[0]);
-			// SendPos = 1;
-		}
-		return 0;
+    SendPos = 0;
+    USART_SendData(USART1, USART_Txbuf[0]);
+    SendPos = 1;
 }
 
+u8 RS232_test(void) {
+    u16 i, crc, reg_addr, reg_num, temp, data_len;
+    u8 crc_H, crc_L;
+    if (RecieceFlag != 0 && FrameFlag != 0) {
+        // å¯¹æ¥æ”¶åˆ°çš„æ•°æ®è¿›è¡Œå¤„ç†
+        // å¯ä»¥å®šä¹‰å‘é€æ•°æ®å¸§ï¼Œå¹¶å¯åŠ¨å‘é€ã€‚å¦‚æœåˆå§‹åŒ–çš„æ—¶å€™å¼€å¯USART_IT_TCä¸­æ–­ï¼Œåˆ™æ²¡å‘é€ä¸€ä¸ªå­—èŠ‚è¿›å…¥ä¸­æ–­ä¸€æ¬¡
+        // é€šè¿‡è¿›å…¥ä¸­æ–­çš„è®¡æ•°å™¨ï¼Œç¡®å®šè¯¥å‘é€å‘é€å¸§ä¸­çš„å“ªä¸ªå­—èŠ‚ï¼Œç›´åˆ°å‘å®Œä¸ºæ­¢
+        RecieceFlag = 0;
+        FrameFlag = 0;
+        crc = Modbus_CRC16(USART_Rxbuf, RXPos - 2);
+        crc_L = crc & 0xFF;
+        crc_H = (crc >> 8) & 0xFF;
 
-void uart1_init(void)	
-{
-	RS232_Configuration();		
-	NVIC_Configuration();
+        if ((crc_L != USART_Rxbuf[RXPos - 2]) || (crc_H != USART_Rxbuf[RXPos - 1])) {
+            // CRCæ ¡éªŒé”™è¯¯
+            Err(USART_Rxbuf[1], 0x03);
+            return 0;
+        }
 
+        RXPos = 0;
+
+        if (USART_Rxbuf[0] != DeviceID) {
+            Err(USART_Rxbuf[1], 0x04);
+            return 0;
+        }
+
+        if (USART_Rxbuf[1] == 0x03) { // å¤„ç†è¯»
+            reg_addr = (USART_Rxbuf[2] << 8) + USART_Rxbuf[3];
+            reg_num = (USART_Rxbuf[4] << 8) + USART_Rxbuf[5];
+
+            if (reg_addr + reg_num - 1 >= 4) { // è¯»è¶Šç•Œ
+                Err(0x03, 0x02);
+                return 0;
+            }
+
+            SendBufLen = 0;
+            USART_Txbuf[SendBufLen++] = DeviceID;
+            USART_Txbuf[SendBufLen++] = 0x03;
+            USART_Txbuf[SendBufLen++] = 0x02 * reg_num; // å­—èŠ‚æ•°
+
+            for (i = reg_addr; i < reg_addr + reg_num; i++) {
+                temp = digit[i] & 0xFFFF;
+                USART_Txbuf[SendBufLen++] = temp >> 8;
+                USART_Txbuf[SendBufLen++] = temp & 0xFF;
+            }
+
+            Send();
+            return 1;
+        }
+
+        if (USART_Rxbuf[1] == 0x10) { // å¤„ç†å†™
+            reg_addr = (USART_Rxbuf[2] << 8) + USART_Rxbuf[3];
+            reg_num = (USART_Rxbuf[4] << 8) + USART_Rxbuf[5];
+            data_len = USART_Rxbuf[6];
+
+            if (reg_addr + reg_num - 1 >= 4) {
+                Err(0x10, 0x02);
+                return 0;
+            }
+
+            if (data_len != reg_num * 2) {
+                Err(0x10, 0x03);
+                return 0;
+            }
+
+            for (i = 0; i < reg_num; i++) {
+                temp = (USART_Rxbuf[7 + (2 * i)] << 8) + (USART_Rxbuf[7 + (2 * i + 1)]);
+                if (temp > 15) {
+                    Err(0x10, 0x03);
+                    return 0;
+                }
+                digit[reg_addr + i] = temp;
+            }
+
+            SendBufLen = 6;
+            USART_Txbuf[0] = DeviceID;
+            USART_Txbuf[1] = 0x10;
+            USART_Txbuf[2] = USART_Rxbuf[2];
+            USART_Txbuf[3] = USART_Rxbuf[3];
+            USART_Txbuf[4] = USART_Rxbuf[4];
+            USART_Txbuf[5] = USART_Rxbuf[5];
+
+            Send();
+            return 1;
+        }
+
+        Err(USART_Txbuf[1], 0x01);
+        return 0;
+        // USART_Txbuf[0] = crc & 0xFF;
+        // USART_Txbuf[1] = (crc >> 8) & 0xFF;
+        // SendBufLen = 2;
+        // SendBufLen = RXPos;
+        // for (i = 0; i < RXPos; i ++ ){
+        // 	USART_Txbuf[i] = USART_Rxbuf[i];
+        // }
+
+        // SendPos = 0 ;
+        // USART_SendData(USART1, USART_Txbuf[0]);
+        // SendPos = 1;
+    }
+    return 0;
+}
+
+void uart1_init(void) {
+    RS232_Configuration();
+    NVIC_Configuration();
 }

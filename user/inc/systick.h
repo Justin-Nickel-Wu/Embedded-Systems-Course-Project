@@ -4,11 +4,11 @@
 #include "GPIO.h"
 #include "stm32f10x.h"
 
-#define digit_display_fps 120  // 数码管刷新频率
+#define digit_display_fps 120 // 数码管刷新频率
 
 extern int TimeSecond;
 extern int Time1msConunt;
-extern volatile int time1ms ;
+extern volatile int time1ms;
 
 extern bool digit_switch_flag;
 

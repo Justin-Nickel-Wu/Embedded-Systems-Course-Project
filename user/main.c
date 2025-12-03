@@ -36,6 +36,9 @@ void BoardInit() {
 }
 
 int main(void) {
+    uint8_t BUF[5];
+    u8 changed = 0;
+
     LED_Init();
     KEY_Init();
     KEYBOARD_Init();
@@ -45,9 +48,11 @@ int main(void) {
     uart1_init();
     IIC_Configuration();
 
-    while (1) {
-        IIC_test();
+    I2C_Master_BufferRead(I2C1, BUF, 4, 0xA0, 0);
+    digit[0] = BUF[0], digit[1] = BUF[1], digit[2] = BUF[2], digit[3] = BUF[3];
 
+    while (1) {
+        // IIC_test();
         if (digit_switch_flag) {
             digit_switch_flag = false;
             digit_display_switch();
@@ -59,13 +64,20 @@ int main(void) {
         }
 
         if (input_key_flag) {
+            changed = 1;
             digit[3] = digit[2];
             digit[2] = digit[1];
             digit[1] = digit[0];
             digit[0] = input_key;
             input_key_flag = 0;
         }
-        RS232_test();
+        changed |= RS232_test();
+
+        if (changed) {
+            BUF[0] = 0, BUF[1] = digit[0], BUF[2] = digit[1], BUF[3] = digit[2], BUF[4] = digit[3];
+            I2C_Master_BufferWrite(I2C1, BUF, 5, 0xA0);
+            changed = 0;
+        }
     }
     // return 1;
 }
