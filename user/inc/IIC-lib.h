@@ -9,4 +9,6 @@ uint8_t I2C_Master_BufferWrite(I2C_TypeDef *I2Cx, uint8_t *pBuffer, uint32_t Num
 
 uint8_t I2C_Master_BufferRead(I2C_TypeDef *I2Cx, uint8_t *pBuffer, uint32_t NumByteToRead, uint8_t SlaveAddress, uint8_t wordaddress);
 
+void IIC_test(void);
+
 #endif
