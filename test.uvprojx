@@ -429,6 +429,11 @@
               <FileType>1</FileType>
               <FilePath>.\stddriver\src\stm32f10x_usart.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32f10x_i2c.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\stddriver\src\stm32f10x_i2c.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -463,6 +468,11 @@
               <FileName>UART.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\user\UART.c</FilePath>
+            </File>
+            <File>
+              <FileName>IIC-lib.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\user\IIC-lib.c</FilePath>
             </File>
           </Files>
         </Group>

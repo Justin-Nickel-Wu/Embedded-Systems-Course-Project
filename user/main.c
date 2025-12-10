@@ -29,6 +29,7 @@
 #include "systick.h"
 #include "UART.h"
 #include "IIC-lib.h"
+#include "SPI2.h"
 
 void BoardInit() {
     /* System Clocks Configuration */
@@ -36,8 +37,9 @@ void BoardInit() {
 }
 
 int main(void) {
-    uint8_t BUF[5];
+    u8 BUF[5];
     u8 changed = 0;
+    u8 test[10];
 
     LED_Init();
     KEY_Init();
@@ -47,6 +49,11 @@ int main(void) {
     systick_init();
     uart1_init();
     IIC_Configuration();
+
+    SPI2_Init();
+    W25Q32_CS_LOW();
+    W25Q32_ReadID(test);
+    W25Q32_CS_HIGH();
 
     I2C_Master_BufferRead(I2C1, BUF, 4, 0xA0, 0);
     digit[0] = BUF[0], digit[1] = BUF[1], digit[2] = BUF[2], digit[3] = BUF[3];
@@ -64,11 +71,11 @@ int main(void) {
         }
 
         if (input_key_flag) {
-            changed = 1;
-            digit[3] = digit[2];
-            digit[2] = digit[1];
-            digit[1] = digit[0];
-            digit[0] = input_key;
+            changed        = 1;
+            digit[3]       = digit[2];
+            digit[2]       = digit[1];
+            digit[1]       = digit[0];
+            digit[0]       = input_key;
             input_key_flag = 0;
         }
         changed |= RS232_test();

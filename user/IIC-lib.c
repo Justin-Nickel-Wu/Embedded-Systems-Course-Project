@@ -12,21 +12,21 @@ void IIC_Configuration(void) {
     RCC_APB1PeriphClockCmd(RCC_APB1Periph_I2C1, ENABLE);
 
     // PB6 = SCL，PB7 = SDA，必须为开漏输出（AF_OD）
-    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6 | GPIO_Pin_7;
-    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
+    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_6 | GPIO_Pin_7;
+    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_AF_OD;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
     GPIO_Init(GPIOB, &GPIO_InitStructure);
 
     I2C_DeInit(I2C1);
 
     // I2C 工作模式，标准 I2C，100kHz
-    I2C_InitStructure.I2C_Mode = I2C_Mode_I2C;
+    I2C_InitStructure.I2C_Mode      = I2C_Mode_I2C;
     I2C_InitStructure.I2C_DutyCycle = I2C_DutyCycle_2;
 
     // 本机地址（仅在作为从机时使用，这里主机模式其实不影响）
     I2C_InitStructure.I2C_OwnAddress1 = 0XA0;
 
-    I2C_InitStructure.I2C_Ack = I2C_Ack_Enable;
+    I2C_InitStructure.I2C_Ack                 = I2C_Ack_Enable;
     I2C_InitStructure.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 
     // 通信速率 10kHz（非常慢，一般用 100k）
@@ -123,7 +123,7 @@ uint8_t I2C_Master_BufferRead(I2C_TypeDef *I2Cx, uint8_t *pBuffer, uint32_t NumB
     return 0;
 }
 
-unsigned char IICInBuf[20] = {0};
+unsigned char IICInBuf[20]    = {0};
 unsigned char IICWriteBuf[20] = {0, 66, 77, 3, 4, 5, 6, 7, 8, 9, 10};
 // IICWriteBuf[0] = word address，从第 1 字节开始才是写入数据
 
