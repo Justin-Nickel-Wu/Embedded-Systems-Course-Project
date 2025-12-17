@@ -5,8 +5,8 @@
 #include "sys.h"
 #include "DigitalTube.h"
 #include "wdg.h"
-#include "dma.h"		
-#include "lcd.h"		
+#include "dma.h"
+#include "lcd.h"
 #include "EXTI.h"
 #include "Register_config.h"
 
@@ -15,13 +15,13 @@ void LED_Blink(void);
 void One_LED_ON(unsigned char led_num);
 void One_LED_OFF(unsigned char led_num);
 void LED_TURN(void);
-	
+
 void BEEP_Configuration(void);
 void Beep(void);
 
 void KEY_Configuration(void);
 void Count_KEY_Init(void);
-int  KEY_read(void);
+int KEY_read(void);
 void key_test(void);
 u8 KEY_Scan(void);
 
@@ -36,11 +36,11 @@ void AIAO_test(void);
 
 void LCD_Configuration(void);
 void LCD_test(void);
-void Touch_test(void);		
+void Touch_test(void);
 
 void Counter_test(void);
 
-void PWM_Configuration(u16 arr,u16 psc);
+void PWM_Configuration(u16 arr, u16 psc);
 void PWM_test(void);
 
 void DMA_test(void);

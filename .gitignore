@@ -26,3 +26,7 @@ JLinkLog.txt
 JLinkSettings.ini
 *.scvd
 *.dbgconf
+
+#vscode settings
+.vscode/
+.clang-format
