@@ -1,0 +1,28 @@
+# Keil build output
+Project/RVMDK/Obj
+Project/RVMDK/List
+Project/RVMDK/DebugConfig
+Release/
+
+# Object & binary files
+*.o
+*.obj
+*.elf
+*.axf
+*.hex
+*.bin
+*.map
+*.lst
+
+# Keil user-specific files
+*.uvguix.*
+*.uvoptx
+*.uvopt
+*.dep
+*.bak
+
+# Debug / trace
+JLinkLog.txt
+JLinkSettings.ini
+*.scvd
+*.dbgconf
