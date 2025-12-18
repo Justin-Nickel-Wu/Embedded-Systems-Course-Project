@@ -1008,8 +1008,8 @@ void Touch_Check() {
         while (status == 0) {
             LCD_ShowString(45, 0, 240, 12, 12, "Press No.1 Point");
             if (PressFlag > 0) { // 已经触摸过了
-                PointX_ADmin = (PointX_ADmin + xScreenAD) >> 1;
-                PointY_ADmin = (PointY_ADmin + yScreenAD) >> 1;
+                PointX_ADmin = PointX_ADmin * 0.1 + xScreenAD * 0.9;
+                PointY_ADmin = PointY_ADmin * 0.1 + yScreenAD * 0.9;
                 sprintf(showstr, "TouchAD, x:%4d y%4d   ", xScreenAD, yScreenAD);
                 LCD_ShowString(45, 60, 240, 12, 12, showstr);
                 status = 1;
@@ -1028,8 +1028,8 @@ void Touch_Check() {
         while (status == 1) {
             LCD_ShowString(45, 0, 240, 12, 12, "Press No.2 Point");
             if (PressFlag > 0) { // 已经触摸过了
-                PointX_ADmax = (PointX_ADmax + xScreenAD) >> 1;
-                PointY_ADmax = (PointY_ADmax + yScreenAD) >> 1;
+                PointX_ADmax = PointX_ADmax * 0.1 + xScreenAD * 0.9;
+                PointY_ADmax = PointY_ADmax * 0.1 + yScreenAD * 0.9;
                 sprintf(showstr, "TouchAD, x:%4d y%4d   ", xScreenAD, yScreenAD);
                 LCD_ShowString(45, 60, 240, 12, 12, showstr);
                 status = 0;
@@ -1049,7 +1049,10 @@ void Touch_Check() {
 }
 
 void showTouch() {
-    sprintf(showstr, "Press at:%4d y%4d   ", xScreen, yScreen);
-    LCD_ShowString(45, 0, 240, 12, 12, showstr);
-    LCD_ShowString(xScreen - 2, yScreen - 5, 240, 12, 12, "+"); //+中心点对坐标的偏移为2，5
+    if (PressFlag > 0) {
+        sprintf(showstr, "Press at:%4d y%4d   ", xScreen, yScreen);
+        LCD_ShowString(45, 0, 240, 12, 12, showstr);
+        LCD_ShowString(xScreen - 2, yScreen - 5, 240, 12, 12, "+"); //+中心点对坐标的偏移为2，5
+        PressFlag = 0;
+    }
 }
