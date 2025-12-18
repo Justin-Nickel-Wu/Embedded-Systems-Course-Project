@@ -24,6 +24,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f10x.h"
+#include "chess.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -48,6 +49,7 @@ int main(void) {
     LCD_Init();
     Touch_Check();
 
+    drawChessboard();
     while (1) {
         showTouch();
     }
