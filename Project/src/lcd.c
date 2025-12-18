@@ -6,7 +6,7 @@
 
 // LCD的画笔颜色和背景色
 u16 POINT_COLOR = 0x0000; // 画笔颜色
-u16 BACK_COLOR  = 0xeeee; // 背景色
+u16 BACK_COLOR = 0xeeee; // 背景色
 
 // 管理LCD重要参数
 // 默认为竖屏
@@ -53,7 +53,7 @@ void LCD_Configuration(void) {
     GPIOD->CRL |= 0X30330000;
     GPIOD->CRH &= 0XFFF00FFF;
     GPIOD->CRH |= 0X00033000; // PD4 5 7 11 12推挽输出
-    GPIOD->ODR |= 0X1000;     // PD12置高
+    GPIOD->ODR |= 0X1000; // PD12置高
 
     GPIOC->CRL &= 0XFFFFFFF0;
     GPIOC->CRL |= 0X00000003; // PC0推挽输出
@@ -91,9 +91,9 @@ void LCD_Config_DIN(void) {
 
 void LCD_Config_DOUT(void) {
     GPIO_InitTypeDef GPIO_InitStructure;
-    GPIO_InitStructure.GPIO_Pin   = 0xC703; ////GPIO_Pin_14 | GPIO_Pin_15 |GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_8|GPIO_Pin_9|GPIO_Pin_10 ;
+    GPIO_InitStructure.GPIO_Pin = 0xC703; ////GPIO_Pin_14 | GPIO_Pin_15 |GPIO_Pin_0|GPIO_Pin_1|GPIO_Pin_8|GPIO_Pin_9|GPIO_Pin_10 ;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOD, &GPIO_InitStructure);
     //
     GPIO_InitStructure.GPIO_Pin = 0xff80; // PE7-15
@@ -120,16 +120,16 @@ void DATAOUT(u16 x) // 数据输出
 {
     LCD_Config_DOUT();
 
-    GPIOD->BRR  = (0x03 << 14); // LCD_D0,D1; PD14,PD15
+    GPIOD->BRR = (0x03 << 14); // LCD_D0,D1; PD14,PD15
     GPIOD->BSRR = (x & 0x0003) << 14;
 
-    GPIOD->BRR  = (0x03 << 0); // LCD_D2,D3; PD0,PD1
+    GPIOD->BRR = (0x03 << 0); // LCD_D2,D3; PD0,PD1
     GPIOD->BSRR = (x & 0x000c) >> 2;
 
-    GPIOE->BRR  = (0x1ff << 7); // LCD_D4-12; PE7-15
+    GPIOE->BRR = (0x1ff << 7); // LCD_D4-12; PE7-15
     GPIOE->BSRR = (x & 0x1ff0) << 3;
 
-    GPIOD->BRR  = (0x07 << 8); // LCD_D13,D14,D15; PD8-10
+    GPIOD->BRR = (0x07 << 8); // LCD_D13,D14,D15; PD8-10
     GPIOD->BSRR = (x & 0xE000) >> 5;
 }
 
@@ -221,7 +221,7 @@ u16 LCD_ReadPoint(u16 x, u16 y) {
     if (x >= lcddev.width || y >= lcddev.height) return 0; // 超过了范围,直接返回
     LCD_SetCursor(x, y);
     if (lcddev.id == 0X9341) LCD_WR_REG(0X2E); // 9341/6804/3510/1963 发送读GRAM指令
-    DATAIN();                                  //
+    DATAIN(); //
 
     LCD_RS_SET;
     LCD_CS_CLR;
@@ -318,7 +318,7 @@ void LCD_Scan_Dir(u8 dir) {
 // x,y:坐标
 // POINT_COLOR:此点的颜色
 void LCD_DrawPoint(u16 x, u16 y) {
-    LCD_SetCursor(x, y);    // 设置光标位置
+    LCD_SetCursor(x, y); // 设置光标位置
     LCD_WriteRAM_Prepare(); // 开始写入GRAM
     LCD_WR_DATA(POINT_COLOR);
 }
@@ -346,21 +346,21 @@ void LCD_Fast_DrawPoint(u16 x, u16 y, u16 color) // 不使用设置位置、写G
 // SSD1963 背光设置
 // pwm:背光等级,0~100.越大越亮.
 void LCD_SSD_BackLightSet(u8 pwm) {
-    LCD_WR_REG(0xBE);        // 配置PWM输出
-    LCD_WR_DATA(0x05);       // 1设置PWM频率
+    LCD_WR_REG(0xBE); // 配置PWM输出
+    LCD_WR_DATA(0x05); // 1设置PWM频率
     LCD_WR_DATA(pwm * 2.55); // 2设置PWM占空比
-    LCD_WR_DATA(0x01);       // 3设置C
-    LCD_WR_DATA(0xFF);       // 4设置D
-    LCD_WR_DATA(0x00);       // 5设置E
-    LCD_WR_DATA(0x00);       // 6设置F
+    LCD_WR_DATA(0x01); // 3设置C
+    LCD_WR_DATA(0xFF); // 4设置D
+    LCD_WR_DATA(0x00); // 5设置E
+    LCD_WR_DATA(0x00); // 6设置F
 }
 // 设置LCD显示方向
 // dir:0,竖屏；1,横屏
 void LCD_Display_Dir(u8 dir) {
     if (dir == 0) // 竖屏
     {
-        lcddev.dir    = 0; // 竖屏
-        lcddev.width  = 240;
+        lcddev.dir = 0; // 竖屏
+        lcddev.width = 240;
         lcddev.height = 320;
         if (lcddev.id == 0X9341) {
             lcddev.wramcmd = 0X2C;
@@ -369,8 +369,8 @@ void LCD_Display_Dir(u8 dir) {
         }
     } else // 横屏
     {
-        lcddev.dir    = 1; // 横屏
-        lcddev.width  = 320;
+        lcddev.dir = 1; // 横屏
+        lcddev.width = 320;
         lcddev.height = 240;
         if (lcddev.id == 0X9341) {
             lcddev.wramcmd = 0X2C;
@@ -388,7 +388,7 @@ void LCD_Set_Window(u16 sx, u16 sy, u16 width, u16 height) {
     u8 hsareg, heareg, vsareg, veareg;
     u16 hsaval, heaval, vsaval, veaval;
     u16 twidth, theight;
-    twidth  = sx + width - 1;
+    twidth = sx + width - 1;
     theight = sy + height - 1;
     if (lcddev.id == 0X9341) {
         LCD_WR_REG(lcddev.setxcmd);
@@ -414,8 +414,8 @@ void LCD_Init(void) {
 
     // 尝试9341 ID的读取
     LCD_WR_REG(0XD3);
-    LCD_RD_DATA();             // dummy read
-    LCD_RD_DATA();             // 读到0X00
+    LCD_RD_DATA(); // dummy read
+    LCD_RD_DATA(); // 读到0X00
     lcddev.id = LCD_RD_DATA(); // 读取93
     lcddev.id <<= 8;
     lcddev.id |= LCD_RD_DATA(); // 读取41
@@ -446,14 +446,14 @@ void LCD_Init(void) {
         LCD_WR_REG(0xEA);
         LCD_WR_DATAX(0x00);
         LCD_WR_DATAX(0x00);
-        LCD_WR_REG(0xC0);   // Power control
+        LCD_WR_REG(0xC0); // Power control
         LCD_WR_DATAX(0x1B); // VRH[5:0]
-        LCD_WR_REG(0xC1);   // Power control
+        LCD_WR_REG(0xC1); // Power control
         LCD_WR_DATAX(0x01); // SAP[2:0];BT[3:0]
-        LCD_WR_REG(0xC5);   // VCM control
+        LCD_WR_REG(0xC5); // VCM control
         LCD_WR_DATAX(0x30); // 3F
         LCD_WR_DATAX(0x30); // 3C
-        LCD_WR_REG(0xC7);   // VCM control2
+        LCD_WR_REG(0xC7); // VCM control2
         LCD_WR_DATAX(0XB7);
         LCD_WR_REG(0x36); // Memory Access Control
         LCD_WR_DATAX(0x48);
@@ -517,18 +517,18 @@ void LCD_Init(void) {
     }
 
     LCD_Display_Dir(0); // 默认为竖屏
-    LCD_LED = 1;        // 点亮背光
+    LCD_LED = 1; // 点亮背光
     LCD_Clear(WHITE);
 }
 
 // 清屏函数
 // color:要清屏的填充色
 void LCD_Clear(u16 color) {
-    u32 index      = 0;
+    u32 index = 0;
     u32 totalpoint = lcddev.width;
     totalpoint *= lcddev.height; // 得到总点数
     LCD_SetCursor(0x00, 0x0000); // 设置光标位置
-    LCD_WriteRAM_Prepare();      // 开始写入GRAM
+    LCD_WriteRAM_Prepare(); // 开始写入GRAM
     for (index = 0; index < totalpoint; index++) LCD_WR_DATA(color);
 }
 // 在指定区域内填充指定颜色
@@ -542,8 +542,8 @@ void LCD_Fill(u16 sx, u16 sy, u16 ex, u16 ey, u16 color) {
     {
         xlen = ex - sx + 1;
         for (i = sy; i <= ey; i++) {
-            LCD_SetCursor(sx, i);                          // 设置光标位置
-            LCD_WriteRAM_Prepare();                        // 开始写入GRAM
+            LCD_SetCursor(sx, i); // 设置光标位置
+            LCD_WriteRAM_Prepare(); // 开始写入GRAM
             for (j = 0; j < xlen; j++) LCD_WR_DATA(color); // 设置光标位置
         }
     }
@@ -554,11 +554,11 @@ void LCD_Fill(u16 sx, u16 sy, u16 ex, u16 ey, u16 color) {
 void LCD_Color_Fill(u16 sx, u16 sy, u16 ex, u16 ey, u16 *color) {
     u16 height, width;
     u16 i, j;
-    width  = ex - sx + 1; // 得到填充的宽度
+    width = ex - sx + 1; // 得到填充的宽度
     height = ey - sy + 1; // 高度
     for (i = 0; i < height; i++) {
-        LCD_SetCursor(sx, sy + i);                                     // 设置光标位置
-        LCD_WriteRAM_Prepare();                                        // 开始写入GRAM
+        LCD_SetCursor(sx, sy + i); // 设置光标位置
+        LCD_WriteRAM_Prepare(); // 开始写入GRAM
         for (j = 0; j < width; j++) LCD_WR_DATA(color[i * width + j]); // 写入数据
     }
 }
@@ -571,14 +571,14 @@ void LCD_DrawLine(u16 x1, u16 y1, u16 x2, u16 y2) {
     int incx, incy, uRow, uCol;
     delta_x = x2 - x1; // 计算坐标增量
     delta_y = y2 - y1;
-    uRow    = x1;
-    uCol    = y1;
+    uRow = x1;
+    uCol = y1;
     if (delta_x > 0)
         incx = 1; // 设置单步方向
     else if (delta_x == 0)
         incx = 0; // 垂直线
     else {
-        incx    = -1;
+        incx = -1;
         delta_x = -delta_x;
     }
     if (delta_y > 0)
@@ -586,7 +586,7 @@ void LCD_DrawLine(u16 x1, u16 y1, u16 x2, u16 y2) {
     else if (delta_y == 0)
         incy = 0; // 水平线
     else {
-        incy    = -1;
+        incy = -1;
         delta_y = -delta_y;
     }
     if (delta_x > delta_y)
@@ -622,8 +622,8 @@ void LCD_DrawRectangle(u16 x1, u16 y1, u16 x2, u16 y2) {
 void LCD_Draw_Circle(u16 x0, u16 y0, u8 r) {
     int a, b;
     int di;
-    a  = 0;
-    b  = r;
+    a = 0;
+    b = r;
     di = 3 - (r << 1); // 判断下个点位置的标志
     while (a <= b) {
         LCD_DrawPoint(x0 + a, y0 - b); // 5
@@ -651,9 +651,9 @@ void LCD_Draw_Circle(u16 x0, u16 y0, u8 r) {
 // mode:叠加方式(1)还是非叠加方式(0)
 void LCD_ShowChar(u16 x, u16 y, u8 num, u8 size, u8 mode) {
     u8 temp, t1, t;
-    u16 y0   = y;
+    u16 y0 = y;
     u8 csize = (size / 8 + ((size % 8) ? 1 : 0)) * (size / 2); // 得到字体一个字符对应点阵集所占的字节数
-    num      = num - ' ';                                      // 得到偏移后的值（ASCII字库是从空格开始取模，所以-' '就是对应字符的字库）
+    num = num - ' '; // 得到偏移后的值（ASCII字库是从空格开始取模，所以-' '就是对应字符的字库）
     for (t = 0; t < csize; t++) {
         if (size == 12)
             temp = asc2_1206[num][t]; // 调用1206字体
@@ -776,16 +776,16 @@ void TOUCH_SCREEN_INIT() {
     GPIO_PinRemapConfig(GPIO_Remap_SWJ_JTAGDisable, ENABLE); // Disable jtag	,Enable SWD
 
     /* SPI pins configuration */
-    GPIO_InitStructure.GPIO_Pin   = GPIO_Pin_15 | GPIO_Pin_5;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_15 | GPIO_Pin_5;
     GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
-    GPIO_InitStructure.GPIO_Mode  = GPIO_Mode_Out_PP;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_Out_PP;
     GPIO_Init(GPIOA, &GPIO_InitStructure);
 
     GPIO_InitStructure.GPIO_Pin = GPIO_Pin_5;
     GPIO_Init(GPIOB, &GPIO_InitStructure); // MOSI
 
     GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPD;
-    GPIO_InitStructure.GPIO_Pin  = GPIO_Pin_6;
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
     GPIO_Init(GPIOA, &GPIO_InitStructure); // MISO
 
     /*
@@ -821,11 +821,11 @@ u16 PointY_ADmax = 0;
 #define QPSTARTY 0
 
 #define T_CS_SET GPIOA->BSRR = 1 << 15 // 片选端口  		PA15
-#define T_WR_SET GPIOB->BSRR = 1 << 5  // 写数据MOSI			PB5
+#define T_WR_SET GPIOB->BSRR = 1 << 5 // 写数据MOSI			PB5
 #define T_SCK_SET GPIOA->BSRR = 1 << 5 // SCK			PA5
 
 #define T_CS_CLR GPIOA->BRR = 1 << 15 // 片选端口  		PA15
-#define T_WR_CLR GPIOB->BRR = 1 << 5  // 写数据	MOSI		PB5
+#define T_WR_CLR GPIOB->BRR = 1 << 5 // 写数据	MOSI		PB5
 #define T_SCK_CLR GPIOA->BRR = 1 << 5 // SCK			PA5
 
 #define T_IN_STATUE ((GPIOA->IDR & 0X40) ? 1 : 0) // 数据MISO PA6
@@ -877,7 +877,7 @@ u32 SPI_X(void) {
 u32 SPI_Y(void) {
     u16 i, j, k;
     for (i = 0; i < TOUCH_READ_TIMES; i++) { // 采样4次.
-        T_CS_CLR;                            // cs
+        T_CS_CLR; // cs
         SPI_SndRecv(0x90);
         y_addata[i] = SPI_SndRecv(0x00);
         y_addata[i] <<= 8;
@@ -907,8 +907,8 @@ static void TOUCH_INT_EXIT_Init(void) {
     /* Connect Button EXTI Line to Button GPIO Pin */
     GPIO_EXTILineConfig(GPIO_PortSourceGPIOC, GPIO_PinSource2);
     /* Configure Button EXTI line */
-    EXTI_InitStructure.EXTI_Line    = EXTI_Line2;
-    EXTI_InitStructure.EXTI_Mode    = EXTI_Mode_Interrupt;
+    EXTI_InitStructure.EXTI_Line = EXTI_Line2;
+    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;
     EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Falling;
     EXTI_InitStructure.EXTI_LineCmd = ENABLE;
     EXTI_ClearITPendingBit(EXTI_Line2);
@@ -921,10 +921,10 @@ static void TOUCH_InterruptConfig(void) {
     /* Configure the Priority Group to 2 bits */
     NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
 
-    NVIC_InitStructure.NVIC_IRQChannel                   = EXTI2_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannel = EXTI2_IRQn;
     NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority        = 0;
-    NVIC_InitStructure.NVIC_IRQChannelCmd                = ENABLE;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 }
 
@@ -936,13 +936,13 @@ static void getPos(u16 xScreen, u16 yScreen) {
     for (i = QPSTARTX + QPINTERVAL / 2, dist = 9999; i <= QPSTARTX + QPSIZEX; i += QPINTERVAL) {
         if (abs(i - x) <= dist) {
             xScreen = i;
-            dist    = abs(i - x);
+            dist = abs(i - x);
         }
     }
     for (j = QPSTARTY + QPINTERVAL / 2, dist = 9999; j <= QPSTARTY + QPSIZEY; j += QPINTERVAL) {
         if (abs(j - y) <= dist) {
             yScreen = j;
-            dist    = abs(j - y);
+            dist = abs(j - y);
         }
     }
     //		play(xScreen/QPINTERVAL, yScreen/QPINTERVAL);
@@ -993,6 +993,7 @@ char showstr[32];
 
 void Touch_Check() {
     int status = 0;
+    int cnt = 0;
     LCD_ShowString(45, 45, 245, 325, 12, "1");
 
     LCD_ShowString(205, 285, 245, 325, 12, "2");
@@ -1003,29 +1004,46 @@ void Touch_Check() {
     LCD_DrawLine(40, 0, 40, 320);
     LCD_DrawLine(200, 0, 200, 320);
 
-    while (status == 0) {
-        LCD_ShowString(45, 0, 240, 12, 12, "Press No.1 Point");
-        if (PressFlag > 0) // 已经触摸过了
-        {
-            PointX_ADmin = xScreenAD;
-            PointY_ADmin = yScreenAD;
-            sprintf(showstr, "TouchAD, x:%4d y%4d   ", xScreenAD, yScreenAD);
-            LCD_ShowString(45, 12, 240, 12, 12, showstr);
-            status    = 1;
-            PressFlag = 0;
+    while (cnt < 4) {
+        while (status == 0) {
+            LCD_ShowString(45, 0, 240, 12, 12, "Press No.1 Point");
+            if (PressFlag > 0) { // 已经触摸过了
+                PointX_ADmin = (PointX_ADmin + xScreenAD) >> 1;
+                PointY_ADmin = (PointY_ADmin + yScreenAD) >> 1;
+                sprintf(showstr, "TouchAD, x:%4d y%4d   ", xScreenAD, yScreenAD);
+                LCD_ShowString(45, 60, 240, 12, 12, showstr);
+                status = 1;
+                PressFlag = 0;
+
+                sprintf(showstr, "Delta, x:%4d y%4d   ", xScreen - 40, yScreen - 40);
+                LCD_ShowString(45, 72, 240, 12, 12, showstr);
+                if (abs(xScreen - 40) < 10 && abs(yScreen - 40) < 10)
+                    cnt += 1;
+                else
+                    cnt = 0;
+                sprintf(showstr, "cnt:%4d", cnt);
+                LCD_ShowString(45, 84, 240, 12, 12, showstr);
+            }
         }
-    }
-    while (status == 1) {
-        LCD_ShowString(45, 0, 240, 12, 12, "Press No.2 Point");
-        if (PressFlag > 0) // 已经触摸过了
-        {
-            PointX_ADmax = xScreenAD;
-            PointY_ADmax = yScreenAD;
-            sprintf(showstr, "TouchAD, x:%4d y%4d   ", xScreenAD, yScreenAD);
-            LCD_ShowString(45, 24, 240, 12, 12, showstr);
-            status    = 2;
-            PressFlag = 0;
-            status    = 3;
+        while (status == 1) {
+            LCD_ShowString(45, 0, 240, 12, 12, "Press No.2 Point");
+            if (PressFlag > 0) { // 已经触摸过了
+                PointX_ADmax = (PointX_ADmax + xScreenAD) >> 1;
+                PointY_ADmax = (PointY_ADmax + yScreenAD) >> 1;
+                sprintf(showstr, "TouchAD, x:%4d y%4d   ", xScreenAD, yScreenAD);
+                LCD_ShowString(45, 60, 240, 12, 12, showstr);
+                status = 0;
+                PressFlag = 0;
+
+                sprintf(showstr, "Delta, x:%4d y%4d   ", xScreen - 200, yScreen - 280);
+                LCD_ShowString(45, 72, 240, 12, 12, showstr);
+                if (abs(xScreen - 200) < 10 && abs(yScreen - 280) < 10)
+                    cnt += 1;
+                else
+                    cnt = 0;
+                sprintf(showstr, "cnt:%4d", cnt);
+                LCD_ShowString(45, 84, 240, 12, 12, showstr);
+            }
         }
     }
 }
