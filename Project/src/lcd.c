@@ -619,21 +619,28 @@ void LCD_DrawRectangle(u16 x1, u16 y1, u16 x2, u16 y2) {
 // 在指定位置画一个指定大小的圆
 //(x,y):中心点
 // r    :半径
-void LCD_Draw_Circle(u16 x0, u16 y0, u8 r) {
+void LCD_Draw_Circle(u16 x0, u16 y0, u8 r, u8 fill) {
     int a, b;
     int di;
     a = 0;
     b = r;
     di = 3 - (r << 1); // 判断下个点位置的标志
     while (a <= b) {
-        LCD_DrawPoint(x0 + a, y0 - b); // 5
-        LCD_DrawPoint(x0 + b, y0 - a); // 0
-        LCD_DrawPoint(x0 + b, y0 + a); // 4
-        LCD_DrawPoint(x0 + a, y0 + b); // 6
-        LCD_DrawPoint(x0 - a, y0 + b); // 1
-        LCD_DrawPoint(x0 - b, y0 + a);
-        LCD_DrawPoint(x0 - a, y0 - b); // 2
-        LCD_DrawPoint(x0 - b, y0 - a); // 7
+        if (fill == 0) {
+            LCD_DrawPoint(x0 + a, y0 - b); // 5
+            LCD_DrawPoint(x0 + b, y0 - a); // 0
+            LCD_DrawPoint(x0 + b, y0 + a); // 4
+            LCD_DrawPoint(x0 + a, y0 + b); // 6
+            LCD_DrawPoint(x0 - a, y0 + b); // 1
+            LCD_DrawPoint(x0 - b, y0 + a);
+            LCD_DrawPoint(x0 - a, y0 - b); // 2
+            LCD_DrawPoint(x0 - b, y0 - a); // 7
+        } else {
+            LCD_DrawLine(x0 - a, y0 - b, x0 + a, y0 - b);
+            LCD_DrawLine(x0 - b, y0 - a, x0 + b, y0 - a);
+            LCD_DrawLine(x0 - b, y0 + a, x0 + b, y0 + a);
+            LCD_DrawLine(x0 - a, y0 + b, x0 + a, y0 + b);
+        }
         a++;
         // 使用Bresenham算法画圆
         if (di < 0)
@@ -1008,8 +1015,8 @@ void Touch_Check() {
         while (status == 0) {
             LCD_ShowString(45, 0, 240, 12, 12, "Press No.1 Point");
             if (PressFlag > 0) { // 已经触摸过了
-                PointX_ADmin = PointX_ADmin * 0.1 + xScreenAD * 0.9;
-                PointY_ADmin = PointY_ADmin * 0.1 + yScreenAD * 0.9;
+                PointX_ADmin = PointX_ADmin != 0 ? PointX_ADmin * 0.1 + xScreenAD * 0.9 : xScreenAD;
+                PointY_ADmin = PointY_ADmin != 0 ? PointY_ADmin * 0.1 + yScreenAD * 0.9 : yScreenAD;
                 sprintf(showstr, "TouchAD, x:%4d y%4d   ", xScreenAD, yScreenAD);
                 LCD_ShowString(45, 60, 240, 12, 12, showstr);
                 status = 1;
@@ -1028,8 +1035,8 @@ void Touch_Check() {
         while (status == 1) {
             LCD_ShowString(45, 0, 240, 12, 12, "Press No.2 Point");
             if (PressFlag > 0) { // 已经触摸过了
-                PointX_ADmax = PointX_ADmax * 0.1 + xScreenAD * 0.9;
-                PointY_ADmax = PointY_ADmax * 0.1 + yScreenAD * 0.9;
+                PointX_ADmax = PointX_ADmax != 0 ? PointX_ADmax * 0.1 + xScreenAD * 0.9 : xScreenAD;
+                PointY_ADmax = PointY_ADmax != 0 ? PointY_ADmax * 0.1 + yScreenAD * 0.9 : yScreenAD;
                 sprintf(showstr, "TouchAD, x:%4d y%4d   ", xScreenAD, yScreenAD);
                 LCD_ShowString(45, 60, 240, 12, 12, showstr);
                 status = 0;
