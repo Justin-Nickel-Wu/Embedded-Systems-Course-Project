@@ -1011,7 +1011,7 @@ void Touch_Check() {
     LCD_DrawLine(40, 0, 40, 320);
     LCD_DrawLine(200, 0, 200, 320);
 
-    while (cnt < 4) {
+    while (cnt < 2) {
         while (status == 0) {
             LCD_ShowString(45, 0, 240, 12, 12, "Press No.1 Point");
             if (PressFlag > 0) { // 已经触摸过了
@@ -1024,7 +1024,7 @@ void Touch_Check() {
 
                 sprintf(showstr, "Delta, x:%4d y%4d   ", xScreen - 40, yScreen - 40);
                 LCD_ShowString(45, 72, 240, 12, 12, showstr);
-                if (abs(xScreen - 40) < 10 && abs(yScreen - 40) < 10)
+                if (abs(xScreen - 40) < 20 && abs(yScreen - 40) < 20)
                     cnt += 1;
                 else
                     cnt = 0;
@@ -1044,7 +1044,7 @@ void Touch_Check() {
 
                 sprintf(showstr, "Delta, x:%4d y%4d   ", xScreen - 200, yScreen - 280);
                 LCD_ShowString(45, 72, 240, 12, 12, showstr);
-                if (abs(xScreen - 200) < 10 && abs(yScreen - 280) < 10)
+                if (abs(xScreen - 200) < 20 && abs(yScreen - 280) < 20)
                     cnt += 1;
                 else
                     cnt = 0;
@@ -1055,11 +1055,13 @@ void Touch_Check() {
     }
 }
 
+int ShowTouchFlag = 0; // 显示触摸点
+
 void showTouch() {
-    if (PressFlag > 0) {
+     if (ShowTouchFlag > 0) {
         sprintf(showstr, "Press at:%4d y%4d   ", xScreen, yScreen);
+        POINT_COLOR = BLACK;
         LCD_ShowString(45, 0, 240, 12, 12, showstr);
         LCD_ShowString(xScreen - 2, yScreen - 5, 240, 12, 12, "+"); //+中心点对坐标的偏移为2，5
-        PressFlag = 0;
     }
 }

@@ -92,6 +92,10 @@ typedef struct
     u16 setycmd; // 设置y坐标指令
 } _lcd_dev;
 
+// 触摸屏标志位及坐标
+extern int PressFlag;        // 触摸标志位
+extern int xScreen, yScreen; // 触摸屏坐标
+extern int ShowTouchFlag;    // 是否显示触摸点
 // LCD参数
 extern _lcd_dev lcddev; // 管理LCD重要参数
 // LCD的画笔颜色和背景色
