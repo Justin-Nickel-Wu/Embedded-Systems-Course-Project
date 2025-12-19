@@ -7,6 +7,8 @@
 
 extern const int ChessBoardPos[5];
 
-void drawChessboard();
+void drawChessboard(); // 画棋盘
+void reDrawChessboardLine(int x, int y); // 重画棋盘线条
+void selectPiece(); // 选择棋子
 
 #endif
