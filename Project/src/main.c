@@ -54,6 +54,7 @@ int main(void) {
     ShowTouchFlag = 1; // 显示触摸点
     while (1) {
         selectPiece();
+        movePiece();
         showTouch();
     }
 }

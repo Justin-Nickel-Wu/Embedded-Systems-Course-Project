@@ -6,9 +6,12 @@
 #define PIECE_RADIUS 13 // 棋子半径
 
 extern const int ChessBoardPos[5];
+extern int Table[5][5]; // 棋盘状态，0表示无子，1表示白子，2表示黑子
+extern int PieceX, PieceY, PieceValid; // 当前选中的棋子位置
+extern int LastPieceX, LastPieceY, LastPieceValid; // 上次选中的棋子位置
 
 void drawChessboard(); // 画棋盘
 void reDrawChessboardLine(int x, int y); // 重画棋盘线条
 void selectPiece(); // 选择棋子
-
+void movePiece(); // 移动棋子
 #endif

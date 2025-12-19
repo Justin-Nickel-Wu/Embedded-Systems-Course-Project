@@ -3,8 +3,13 @@
 
 const int ChessBoardPos[5] = {24, 72, 120, 168, 216};
 
-int PieceX, PieceY; // 当前选中的棋子位置
-int LastPieceX = -1, LastPieceY = -1; // 上次选中的棋子位置
+struct cordinate {
+    int x;
+    int y;
+};
+
+int PieceX = -1, PieceY = -1, PieceValid = 0; // 当前选中的棋子位置
+int LastPieceX = -1, LastPieceY = -1, LastPieceValid = 0; // 上次选中的棋子位置
 int Table[5][5]; // 棋盘状态，0表示无子，1表示白子，2表示黑子
 
 // 初始化棋盘，包括了棋子位置的初始化
@@ -55,8 +60,21 @@ void reDrawChessboardLine(int x, int y) {
     }
 }
 
+int SelectPieceFlag = 0;
 void selectPiece() {
     if (PressFlag > 0) {
+        SelectPieceFlag = 1;
+        // 擦除上次选中
+        // 如果本次触摸到棋盘外，相当于取消上次的选择
+        LastPieceX = PieceX;
+        LastPieceY = PieceY;
+        LastPieceValid = PieceValid;
+        if (LastPieceValid) {
+            POINT_COLOR = CHESSBOARD_COL;
+            LCD_Draw_Circle(ChessBoardPos[LastPieceX], ChessBoardPos[LastPieceY], PIECE_RADIUS + 1, 0);
+            reDrawChessboardLine(LastPieceX, LastPieceY);
+        }
+
         PressFlag = 0;
         PieceX = PieceY = -1;
         for (int i = 0; i < 5; ++i)
@@ -68,17 +86,44 @@ void selectPiece() {
                 PieceY = i;
             }
         if (PieceX != -1 && PieceY != -1) {
-            // 擦除上次选中
-            if (LastPieceX != -1 && LastPieceY != -1) {
-                POINT_COLOR = CHESSBOARD_COL;
-                LCD_Draw_Circle(ChessBoardPos[LastPieceX], ChessBoardPos[LastPieceY], PIECE_RADIUS + 1, 0);
-                reDrawChessboardLine(LastPieceX, LastPieceY);
-            }
+            PieceValid = 1;
             // 记录本次选中
             POINT_COLOR = CYAN;
             LCD_Draw_Circle(ChessBoardPos[PieceX], ChessBoardPos[PieceY], PIECE_RADIUS + 1, 0);
-            LastPieceX = PieceX;
-            LastPieceY = PieceY;
+        } else {
+            PieceValid = 0;
+        }
+    } else
+        SelectPieceFlag = 0;
+}
+
+int MovePieceFlag = 0;
+void movePiece() {
+    if (SelectPieceFlag) {
+        int LastTouchValid, TouchValid, Distance;
+        LastTouchValid = LastPieceValid && Table[LastPieceX][LastPieceY] != 0;
+        TouchValid = PieceValid && Table[PieceX][PieceY] == 0;
+        Distance = abs(LastPieceX - PieceX) + abs(LastPieceY - PieceY);
+
+        // 判断是否可以移动
+        if (LastTouchValid && TouchValid && (Distance == 1)) {
+            // 移动棋子
+            Table[PieceX][PieceY] = Table[LastPieceX][LastPieceY];
+            Table[LastPieceX][LastPieceY] = 0;
+
+            // 绘制移动后的棋子
+            POINT_COLOR = (Table[PieceX][PieceY] == 1) ? WHITE : BLACK;
+            LCD_Draw_Circle(ChessBoardPos[PieceX], ChessBoardPos[PieceY], PIECE_RADIUS, 1);
+
+            // 重新绘制原有位置
+            POINT_COLOR = CHESSBOARD_COL;
+            LCD_Draw_Circle(ChessBoardPos[LastPieceX], ChessBoardPos[LastPieceY], PIECE_RADIUS, 1);
+            reDrawChessboardLine(LastPieceX, LastPieceY);
+
+            // 置位移动标志
+            MovePieceFlag = 1;
+            return;
         }
     }
+    MovePieceFlag = 0;
 }
