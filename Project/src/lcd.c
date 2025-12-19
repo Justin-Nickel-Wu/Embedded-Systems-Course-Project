@@ -1058,9 +1058,10 @@ void Touch_Check() {
 int ShowTouchFlag = 0; // 显示触摸点
 
 void showTouch() {
-     if (ShowTouchFlag > 0) {
+    if (ShowTouchFlag > 0) {
         sprintf(showstr, "Press at:%4d y%4d   ", xScreen, yScreen);
         POINT_COLOR = BLACK;
+        BACK_COLOR = 0xeeee;
         LCD_ShowString(45, 0, 240, 12, 12, showstr);
         LCD_ShowString(xScreen - 2, yScreen - 5, 240, 12, 12, "+"); //+中心点对坐标的偏移为2，5
     }

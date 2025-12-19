@@ -55,6 +55,7 @@ int main(void) {
     while (1) {
         selectPiece();
         movePiece();
+        changeTurn();
         showTouch();
     }
 }

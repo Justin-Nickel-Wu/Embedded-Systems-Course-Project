@@ -11,9 +11,13 @@ struct cordinate {
 int PieceX = -1, PieceY = -1, PieceValid = 0; // 当前选中的棋子位置
 int LastPieceX = -1, LastPieceY = -1, LastPieceValid = 0; // 上次选中的棋子位置
 int Table[5][5]; // 棋盘状态，0表示无子，1表示白子，2表示黑子
+int whichTurn = 2; // 1表示白方，2表示黑方。黑色先行。
+int SelectPieceFlag = 0; // 选择棋子标志
+int MovePieceFlag = 0; // 移动棋子标志
 
 // 初始化棋盘，包括了棋子位置的初始化
 void drawChessboard() {
+    char showstr[32]; // 显示用字符串
     LCD_Clear(CHESSBOARD_COL);
 
     // 240*320 选取240*240区域座位棋盘。
@@ -36,6 +40,12 @@ void drawChessboard() {
     memset(Table, 0, sizeof(Table));
     Table[0][0] = Table[0][1] = Table[0][2] = Table[0][3] = Table[0][4] = 2; // 黑子
     Table[4][0] = Table[4][1] = Table[4][2] = Table[4][3] = Table[4][4] = 1; // 白子
+
+    sprintf(showstr, "Time for:");
+    POINT_COLOR = BLACK;
+    BACK_COLOR = CHESSBOARD_COL;
+    LCD_ShowString(65, 260, 240, 20, 16, showstr);
+    LCD_Draw_Circle(160, 265, PIECE_RADIUS, 1); // 黑子先行
 }
 
 // 重画棋盘线条
@@ -60,7 +70,6 @@ void reDrawChessboardLine(int x, int y) {
     }
 }
 
-int SelectPieceFlag = 0;
 void selectPiece() {
     if (PressFlag > 0) {
         SelectPieceFlag = 1;
@@ -97,11 +106,10 @@ void selectPiece() {
         SelectPieceFlag = 0;
 }
 
-int MovePieceFlag = 0;
 void movePiece() {
     if (SelectPieceFlag) {
         int LastTouchValid, TouchValid, Distance;
-        LastTouchValid = LastPieceValid && Table[LastPieceX][LastPieceY] != 0;
+        LastTouchValid = LastPieceValid && Table[LastPieceX][LastPieceY] == whichTurn;
         TouchValid = PieceValid && Table[PieceX][PieceY] == 0;
         Distance = abs(LastPieceX - PieceX) + abs(LastPieceY - PieceY);
 
@@ -126,4 +134,12 @@ void movePiece() {
         }
     }
     MovePieceFlag = 0;
+}
+
+void changeTurn() {
+    if (MovePieceFlag) {
+        whichTurn = (whichTurn == 1) ? 2 : 1;
+        POINT_COLOR = whichTurn == 1 ? WHITE : BLACK;
+        LCD_Draw_Circle(160, 265, PIECE_RADIUS, 1);
+    }
 }

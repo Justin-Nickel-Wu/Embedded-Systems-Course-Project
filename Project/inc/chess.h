@@ -14,4 +14,5 @@ void drawChessboard(); // 画棋盘
 void reDrawChessboardLine(int x, int y); // 重画棋盘线条
 void selectPiece(); // 选择棋子
 void movePiece(); // 移动棋子
+void changeTurn(); // 切换玩家
 #endif
