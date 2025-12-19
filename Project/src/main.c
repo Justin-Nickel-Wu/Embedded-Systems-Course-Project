@@ -56,6 +56,7 @@ int main(void) {
         selectPiece();
         movePiece();
         changeTurn();
+        checkTable();
         showTouch();
     }
 }

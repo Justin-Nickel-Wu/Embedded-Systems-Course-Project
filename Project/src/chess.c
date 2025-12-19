@@ -143,3 +143,109 @@ void changeTurn() {
         LCD_Draw_Circle(160, 265, PIECE_RADIUS, 1);
     }
 }
+
+// 检查是否吃子
+void checkEatPiece() {
+    int MyPieceCnt, EnPieceCnt, i, j, MyPiece;
+    int targetX = -1, targetY = -1;
+    MyPiece = Table[PieceX][PieceY];
+    // 只有刚刚移动的子会触发吃子检查
+    // 检查纵向
+    MyPieceCnt = EnPieceCnt = 0;
+    for (j = 0; j < 5; ++j)
+        if (Table[PieceX][j] != 0)
+            Table[PieceX][j] == MyPiece ? ++MyPieceCnt : ++EnPieceCnt;
+
+    // 三子可吃，四子及以上触发特殊规则不能吃。
+    // 共三种情况： OOX OXO XOO
+    // 下同
+    if (MyPieceCnt == 2 && EnPieceCnt == 1) {
+        if (PieceY >= 2 && Table[PieceX][PieceY - 1] && Table[PieceX][PieceY - 2]) {
+            if (Table[PieceX][PieceY - 1] != MyPiece) {
+                targetX = PieceX;
+                targetY = PieceY - 1;
+            } else {
+                targetX = PieceX;
+                targetY = PieceY - 2;
+            }
+        }
+
+        if (PieceY <= 2 && Table[PieceX][PieceY + 1] && Table[PieceX][PieceY + 2]) {
+            if (Table[PieceX][PieceY + 1] != MyPiece) {
+                targetX = PieceX;
+                targetY = PieceY + 1;
+            } else {
+                targetX = PieceX;
+                targetY = PieceY + 2;
+            }
+        }
+
+        if (PieceY > 0 && PieceY < 4 && Table[PieceX][PieceY - 1] && Table[PieceX][PieceY + 1]) {
+            if (Table[PieceX][PieceY - 1] != MyPiece) {
+                targetX = PieceX;
+                targetY = PieceY - 1;
+            } else {
+                targetX = PieceX;
+                targetY = PieceY + 1;
+            }
+        }
+    }
+
+    // 发生吃子
+    if (targetX != -1) {
+        Table[targetX][targetY] = 0;
+        POINT_COLOR = CHESSBOARD_COL;
+        LCD_Draw_Circle(ChessBoardPos[targetX], ChessBoardPos[targetY], PIECE_RADIUS, 1);
+        reDrawChessboardLine(targetX, targetY);
+    }
+
+    // 检查横向
+    targetX = -1;
+    MyPieceCnt = EnPieceCnt = 0;
+    for (i = 0; i < 5; ++i)
+        if (Table[i][PieceY] != 0)
+            Table[i][PieceY] == MyPiece ? ++MyPieceCnt : ++EnPieceCnt;
+    if (MyPieceCnt == 2 && EnPieceCnt == 1) {
+        if (PieceX >= 2 && Table[PieceX - 1][PieceY] && Table[PieceX - 2][PieceY]) {
+            if (Table[PieceX - 1][PieceY] != MyPiece) {
+                targetX = PieceX - 1;
+                targetY = PieceY;
+            } else {
+                targetX = PieceX - 2;
+                targetY = PieceY;
+            }
+        }
+        if (PieceX <= 2 && Table[PieceX + 1][PieceY] && Table[PieceX + 2][PieceY]) {
+            if (Table[PieceX + 1][PieceY] != MyPiece) {
+                targetX = PieceX + 1;
+                targetY = PieceY;
+            } else {
+                targetX = PieceX + 2;
+                targetY = PieceY;
+            }
+        }
+        if (PieceX > 0 && PieceX < 4 && Table[PieceX - 1][PieceY] && Table[PieceX + 1][PieceY]) {
+            if (Table[PieceX - 1][PieceY] != MyPiece) {
+                targetX = PieceX - 1;
+                targetY = PieceY;
+            } else {
+                targetX = PieceX + 1;
+                targetY = PieceY;
+            }
+        }
+    }
+    // 发生吃子
+    if (targetX != -1) {
+        Table[targetX][targetY] = 0;
+        POINT_COLOR = CHESSBOARD_COL;
+        LCD_Draw_Circle(ChessBoardPos[targetX], ChessBoardPos[targetY], PIECE_RADIUS, 1);
+        reDrawChessboardLine(targetX, targetY);
+    }
+}
+
+void checkTable() {
+    if (MovePieceFlag) {
+        // TODO: 检查对手是否无子可动，或其他胜利条件
+        checkEatPiece();
+    }
+}
