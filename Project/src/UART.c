@@ -1,167 +1,151 @@
 /***********************************************************************
-ÎÄ¼şÃû³Æ£ºLED.C
-¹¦    ÄÜ£ºled  IO³õÊ¼»¯
-±àĞ´Ê±¼ä£º2013.4.25
-±à Ğ´ ÈË£º
-×¢    Òâ£º
+æ–‡ä»¶åç§°ï¼šLED.C
+åŠŸ    èƒ½ï¼šled  IOåˆå§‹åŒ–
+ç¼–å†™æ—¶é—´ï¼š2013.4.25
+ç¼– å†™ äººï¼š
+æ³¨    æ„ï¼š
 ***********************************************************************/
 #include "stm32f10x.h"
 #include <stm32f10x_usart.h>
 #include "stdio.h"
 #include "stdint.h"
 
+void RS232_Configuration(void) {
+    GPIO_InitTypeDef GPIO_InitStructure;
+    USART_InitTypeDef USART_InitStructure;
+    // å¼•è„šæ—¶é’Ÿ
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
+    // ä¸²å£æ—¶é’Ÿ
+    RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
 
-void RS232_Configuration(void)
-{
-	GPIO_InitTypeDef GPIO_InitStructure;
- 	USART_InitTypeDef USART_InitStructure; 
-	//Òı½ÅÊ±ÖÓ
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA, ENABLE);
-	//´®¿ÚÊ±ÖÓ
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_USART1, ENABLE);
+    /*
+     *  USART1_TX -> PA9 , USART1_RX ->	PA10
+     */
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
+    GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;
+    GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;
+    GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+    GPIO_Init(GPIOA, &GPIO_InitStructure);
 
-  /*
-  *  USART1_TX -> PA9 , USART1_RX ->	PA10
-  */				
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;	         
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP; 
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-  GPIO_Init(GPIOA, &GPIO_InitStructure);		   
+    // ä¸²å£1åˆå§‹åŒ–
+    USART_InitStructure.USART_BaudRate = 115200;
+    USART_InitStructure.USART_WordLength = USART_WordLength_8b;
+    USART_InitStructure.USART_StopBits = USART_StopBits_1;
+    USART_InitStructure.USART_Parity = USART_Parity_No;
+    USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
+    USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
+    USART_Init(USART1, &USART_InitStructure);
 
-  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_10;	        
-  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN_FLOATING;  
-  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz; 
-  GPIO_Init(GPIOA, &GPIO_InitStructure);
-	
-		//´®¿Ú1³õÊ¼»¯
-	USART_InitStructure.USART_BaudRate = 115200;
-	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
-	USART_InitStructure.USART_StopBits = USART_StopBits_1;
-	USART_InitStructure.USART_Parity = USART_Parity_No;
-	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
-	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
-	USART_Init(USART1, &USART_InitStructure);
-
-	USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
-	USART_ITConfig(USART1, USART_IT_TC, ENABLE);//¿ÕÏĞÖĞ¶Ï
-	USART_ClearITPendingBit(USART1, USART_IT_TC);//Çå³ıÖĞ¶ÏTCÎ»
-	USART_ClearITPendingBit(USART1, USART_IT_RXNE);//Çå³ıÖĞ¶ÏTCÎ»
-	USART_Cmd(USART1, ENABLE);
-	
+    USART_ITConfig(USART1, USART_IT_RXNE, ENABLE);
+    USART_ITConfig(USART1, USART_IT_TC, ENABLE); // ç©ºé—²ä¸­æ–­
+    USART_ClearITPendingBit(USART1, USART_IT_TC); // æ¸…é™¤ä¸­æ–­TCä½
+    USART_ClearITPendingBit(USART1, USART_IT_RXNE); // æ¸…é™¤ä¸­æ–­TCä½
+    USART_Cmd(USART1, ENABLE);
 }
 
-void NVIC_Configuration(void)
-{
-  NVIC_InitTypeDef   NVIC_InitStructure;
+void NVIC_Configuration(void) {
+    NVIC_InitTypeDef NVIC_InitStructure;
 
-  /* Set the Vector Table base location at 0x08000000 */
-  NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x0);
+    /* Set the Vector Table base location at 0x08000000 */
+    NVIC_SetVectorTable(NVIC_VectTab_FLASH, 0x0);
 
-  /* 2 bit for pre-emption priority, 2 bits for subpriority */
-  NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2); 
-  
-  /* Enable the Ethernet global Interrupt */
-  
-	NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;	  
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;	
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-	NVIC_Init(&NVIC_InitStructure);
-	//Èç¹û»¹ÓĞÆäËûÖĞ¶Ï£¬°´ÕÕÏÂÃæÀàËÆµÄÔö¼Ó¼´¿É
-//	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;	  
-//	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
-//	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;	
-//	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//	NVIC_Init(&NVIC_InitStructure); 
+    /* 2 bit for pre-emption priority, 2 bits for subpriority */
+    NVIC_PriorityGroupConfig(NVIC_PriorityGroup_2);
+
+    /* Enable the Ethernet global Interrupt */
+
+    NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    NVIC_Init(&NVIC_InitStructure);
+    // å¦‚æœè¿˜æœ‰å…¶ä»–ä¸­æ–­ï¼ŒæŒ‰ç…§ä¸‹é¢ç±»ä¼¼çš„å¢åŠ å³å¯
+    //	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
+    //	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
+    //	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+    //	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+    //	NVIC_Init(&NVIC_InitStructure);
 }
 /***********************************************************************
-º¯ÊıÃû³Æ£ºvoid USART1_IRQHandler(void) 
-¹¦    ÄÜ£ºÍê³ÉSCIµÄÊı¾İµÄ½ÓÊÕ£¬²¢×ö±êÊ¶
-ÊäÈë²ÎÊı£º
-Êä³ö²ÎÊı£º
-±àĞ´Ê±¼ä£º2012.11.22
-±à Ğ´ ÈË£º
-×¢    Òâ  RS485ÓÃµÄÊÇUSART3.
+å‡½æ•°åç§°ï¼švoid USART1_IRQHandler(void)
+åŠŸ    èƒ½ï¼šå®ŒæˆSCIçš„æ•°æ®çš„æ¥æ”¶ï¼Œå¹¶åšæ ‡è¯†
+è¾“å…¥å‚æ•°ï¼š
+è¾“å‡ºå‚æ•°ï¼š
+ç¼–å†™æ—¶é—´ï¼š2012.11.22
+ç¼– å†™ äººï¼š
+æ³¨    æ„  RS485ç”¨çš„æ˜¯USART3.
 ***********************************************************************/
 
-
 u8 RS232InData;
-#define USART_BUF_LEN  			200  	//¶¨Òå×î´ó½ÓÊÕ×Ö½ÚÊı 200
-u8 USART_Rxbuf[USART_BUF_LEN];     //½ÓÊÕ»º³å,×î´óUSART_REC_LEN¸ö×Ö½Ú.
-u8 USART_Txbuf[USART_BUF_LEN];     //½ÓÊÕ»º³å,×î´óUSART_REC_LEN¸ö×Ö½Ú.
-u16 RXPos=0;
+#define USART_BUF_LEN 200 // å®šä¹‰æœ€å¤§æ¥æ”¶å­—èŠ‚æ•° 200
+u8 USART_Rxbuf[USART_BUF_LEN]; // æ¥æ”¶ç¼“å†²,æœ€å¤§USART_REC_LENä¸ªå­—èŠ‚.
+u8 USART_Txbuf[USART_BUF_LEN]; // æ¥æ”¶ç¼“å†²,æœ€å¤§USART_REC_LENä¸ªå­—èŠ‚.
+u16 RXPos = 0;
 u16 FrameFlag = 0;
-u16 RecvTimeOver=10;
-u16 SendPos,SendBufLen;
+u16 RecvTimeOver = 10;
+u16 SendPos, SendBufLen;
 
-void USART1_IRQHandler(void)  
-{
-		if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)  //½ÓÊÕÖĞ¶Ï(
-		{
-			if(RXPos<=USART_BUF_LEN)//»º³åÇøÎ´Âú
-			{
-				USART_Rxbuf[RXPos]=USART_ReceiveData(USART1);//(USART1->DR);	//¶ÁÈ¡½ÓÊÕµ½µÄÊı¾İ ;
-				RXPos++;
-			}
-			RecvTimeOver = 10 ;  //Ã¿´Î½ÓÊÕµ½Êı¾İ£¬³¬Ê±¼ì²âÊ±¼ä10ms
-    } 	
-		
-		if (USART_GetITStatus(USART1, USART_IT_TC) != RESET) 
-		{
-				USART_ClearITPendingBit(USART1, USART_IT_TC);           /* Clear the USART transmit interrupt       */
-				SendPos ++ ; //½øÀ´µÄÊ±ºòÒÑ¾­·¢ËÍÍê³É1¸ö×Ö½Ú
-			  if ( SendPos < SendBufLen )
-				{
-					USART_SendData(USART1,USART_Txbuf[SendPos]);
-					
-				}
-					//·¢ËÍÊı¾İ
-				//UART1->DR = data ;
-		}	
+void USART1_IRQHandler(void) {
+    if (USART_GetITStatus(USART1, USART_IT_RXNE) != RESET) // æ¥æ”¶ä¸­æ–­(
+    {
+        if (RXPos <= USART_BUF_LEN) // ç¼“å†²åŒºæœªæ»¡
+        {
+            USART_Rxbuf[RXPos] = USART_ReceiveData(USART1); //(USART1->DR);	//è¯»å–æ¥æ”¶åˆ°çš„æ•°æ® ;
+            RXPos++;
+        }
+        RecvTimeOver = 10; // æ¯æ¬¡æ¥æ”¶åˆ°æ•°æ®ï¼Œè¶…æ—¶æ£€æµ‹æ—¶é—´10ms
+    }
+
+    if (USART_GetITStatus(USART1, USART_IT_TC) != RESET) {
+        USART_ClearITPendingBit(USART1, USART_IT_TC); /* Clear the USART transmit interrupt       */
+        SendPos++; // è¿›æ¥çš„æ—¶å€™å·²ç»å‘é€å®Œæˆ1ä¸ªå­—èŠ‚
+        if (SendPos < SendBufLen) {
+            USART_SendData(USART1, USART_Txbuf[SendPos]);
+        }
+        // å‘é€æ•°æ®
+        // UART1->DR = data ;
+    }
 }
 
-int RS232_FrameCheck(int len)
-{
-		int CRCCode = 0xffff0000;
-		//´Ë´¦×Ô¼ºÍê³ÉĞ£ÑéÂëµÄ¼ÆËã£¬±È½Ï¼òµ¥µÄÈçÀÛ¼ÓºÍ£¬¿É¿¿Ò»µãµÄ¿ÉÒÔModebusCRC16,Ò²¾ÍÊÇÑ­»·ÈßÓàĞ£Ñé
-		
-	
-		return CRCCode ; //µÍ16Î»Î»CRCÂë£¬
+int RS232_FrameCheck(int len) {
+    int CRCCode = 0xffff0000;
+    // æ­¤å¤„è‡ªå·±å®Œæˆæ ¡éªŒç çš„è®¡ç®—ï¼Œæ¯”è¾ƒç®€å•çš„å¦‚ç´¯åŠ å’Œï¼Œå¯é ä¸€ç‚¹çš„å¯ä»¥ModebusCRC16,ä¹Ÿå°±æ˜¯å¾ªç¯å†—ä½™æ ¡éªŒ
+
+    return CRCCode; // ä½16ä½ä½CRCç ï¼Œ
 }
 
+void RS232_FrameHandle() {
+    int CRCCode;
+    // ç¬¬ä¸€æ­¥ï¼Œå¸§æ ¡éªŒï¼Œåªæœ‰æ ¡éªŒé€šè¿‡çš„å¸§æ‰éœ€è¦å¤„ç†ï¼Œå¦åˆ™ç›´æ¥ä¸¢å¼ƒ
+    CRCCode = RS232_FrameCheck(SendPos - 2);
+    if ((CRCCode & 0xffff) != ((USART_Rxbuf[RXPos - 2] << 8) + USART_Rxbuf[RXPos - 1])) {
+        return;
+    }
+    // ç¬¬äºŒæ­¥ï¼Œå¸§çš„å†…å®¹å¤„ç†
+    USART_Txbuf[0] = USART_Rxbuf[0];
+    USART_Txbuf[1] = USART_Rxbuf[1];
+    SendPos = 0;
+    RXPos = 0;
+    switch (USART_Rxbuf[1]) {
+    case 3: // è¯»å–ç¼“å†²åŒºå†…å®¹
+        USART_Txbuf[2] = USART_Rxbuf[5] * 2;
+        SendBufLen = USART_Txbuf[2] + 5;
+        USART_Txbuf[SendBufLen - 1] = CRCCode;
+        USART_Txbuf[SendBufLen - 2] = CRCCode >> 8;
+        USART_SendData(USART1, USART_Txbuf[0]);
+        break;
+    case 6: // å†™ç¼“å†²åŒº2ä¸ªå­—èŠ‚
 
-void RS232_FrameHandle()
-{
-	int CRCCode;
-	//µÚÒ»²½£¬Ö¡Ğ£Ñé£¬Ö»ÓĞĞ£ÑéÍ¨¹ıµÄÖ¡²ÅĞèÒª´¦Àí£¬·ñÔòÖ±½Ó¶ªÆú
-	CRCCode = RS232_FrameCheck(SendPos - 2);
-	if (  (CRCCode & 0xffff)  != ((USART_Rxbuf[RXPos-2] << 8) + USART_Rxbuf[RXPos-1]) ) 
-	{
-			return ;
-	}
-	//µÚ¶ş²½£¬Ö¡µÄÄÚÈİ´¦Àí
-	USART_Txbuf[0] = USART_Rxbuf[0];
-	USART_Txbuf[1] = USART_Rxbuf[1];
-	SendPos = 0 ;
-	RXPos = 0 ;
-	switch (USART_Rxbuf[1])
-	{
-		case 3 : //¶ÁÈ¡»º³åÇøÄÚÈİ
-			USART_Txbuf[2] = USART_Rxbuf[5]*2;
-		  SendBufLen = USART_Txbuf[2]+5;
-			USART_Txbuf[SendBufLen-1] = CRCCode;
-		  USART_Txbuf[SendBufLen-2] = CRCCode >> 8;
-			USART_SendData(USART1,USART_Txbuf[0]);
-			break ;
-		case 6 :  //Ğ´»º³åÇø2¸ö×Ö½Ú
+        break;
+    case 0x10: // å†™ç¼“å†²åŒº2nä¸ªå­—èŠ‚
 
-			
-			break ;
-		case 0x10 :  //Ğ´»º³åÇø2n¸ö×Ö½Ú
-			break ;
-		
-		default :
-			break ;
-	}
+        break;
+
+    default:
+        break;
+    }
 }
