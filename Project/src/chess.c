@@ -14,6 +14,8 @@ int Table[5][5]; // 棋盘状态，0表示无子，1表示白子，2表示黑子
 int whichTurn = 2; // 1表示白方，2表示黑方。黑色先行。
 int SelectPieceFlag = 0; // 选择棋子标志
 int MovePieceFlag = 0; // 移动棋子标志
+int WCnt, BCnt; // 白黑双方棋子数
+int WinFlag;
 
 // 初始化棋盘，包括了棋子位置的初始化
 void drawChessboard() {
@@ -40,6 +42,8 @@ void drawChessboard() {
     memset(Table, 0, sizeof(Table));
     Table[0][0] = Table[0][1] = Table[0][2] = Table[0][3] = Table[0][4] = 2; // 黑子
     Table[4][0] = Table[4][1] = Table[4][2] = Table[4][3] = Table[4][4] = 1; // 白子
+    WCnt = BCnt = 5;
+    WinFlag = 0;
 
     sprintf(showstr, "Time for:");
     POINT_COLOR = BLACK;
@@ -193,6 +197,10 @@ void checkEatPiece() {
 
     // 发生吃子
     if (targetX != -1) {
+        if (Table[targetX][targetY] == 1)
+            --WCnt;
+        else
+            --BCnt;
         Table[targetX][targetY] = 0;
         POINT_COLOR = CHESSBOARD_COL;
         LCD_Draw_Circle(ChessBoardPos[targetX], ChessBoardPos[targetY], PIECE_RADIUS, 1);
@@ -236,6 +244,10 @@ void checkEatPiece() {
     }
     // 发生吃子
     if (targetX != -1) {
+        if (Table[targetX][targetY] == 1)
+            --WCnt;
+        else
+            --BCnt;
         Table[targetX][targetY] = 0;
         POINT_COLOR = CHESSBOARD_COL;
         LCD_Draw_Circle(ChessBoardPos[targetX], ChessBoardPos[targetY], PIECE_RADIUS, 1);
@@ -243,9 +255,40 @@ void checkEatPiece() {
     }
 }
 
+void Win(int winner) {
+    WinFlag = winner;
+    // TODO: 显示胜利信息
+}
+
+void checkEatAll() {
+    if (WCnt == 0 || BCnt == 0) {
+        if (WCnt == 0)
+            WIN(1);
+        else
+            WIN(2);
+    }
+}
+
+void checkCantMove() {
+    if (abs(WCnt - BCnt) >= 2) { // 至少多两子，才有可能触发
+        int i, j;
+        for (i = 0; i < 5; ++i)
+            for (j = 0; j < 5; ++j)
+                if (Table[i][j] == whichTurn) { // 此时已经完成换边，即A下完后B被检查
+                    // 检查四个方向是否有空位
+                    if (i > 0 && Table[i - 1][j] == 0) return;
+                    if (i < 4 && Table[i + 1][j] == 0) return;
+                    if (j > 0 && Table[i][j - 1] == 0) return;
+                    if (j < 4 && Table[i][j + 1] == 0) return;
+                }
+        Win(whichTurn == 1 ? 2 : 1);
+    }
+}
+
 void checkTable() {
     if (MovePieceFlag) {
-        // TODO: 检查对手是否无子可动，或其他胜利条件
         checkEatPiece();
+        checkEatAll();
+        checkCantMove();
     }
 }

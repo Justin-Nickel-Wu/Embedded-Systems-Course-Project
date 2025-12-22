@@ -58,6 +58,10 @@ int main(void) {
         changeTurn();
         checkTable();
         showTouch();
+        if (WinFlag != 0) {
+            while (1);
+            // TODO: 增加再来一局功能
+        }
     }
 }
 
