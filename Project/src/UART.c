@@ -86,7 +86,7 @@ u8 USART_Rxbuf[USART_BUF_LEN]; // 接收缓冲,最大USART_REC_LEN个字节.
 u8 USART_Txbuf[USART_BUF_LEN]; // 接收缓冲,最大USART_REC_LEN个字节.
 u16 RXPos = 0;
 u16 FrameFlag = 0;
-u16 RecvTimeOver = 10;
+u16 RecvTimeOver = 0;
 u16 SendPos, SendBufLen;
 
 void USART1_IRQHandler(void) {
@@ -148,4 +148,5 @@ void RS232_FrameHandle() {
     default:
         break;
     }
+    RXPos = 0;
 }
