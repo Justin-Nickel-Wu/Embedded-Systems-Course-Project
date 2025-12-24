@@ -19,7 +19,6 @@ int WinFlag;
 
 // 初始化棋盘，包括了棋子位置的初始化
 void drawChessboard() {
-    char showstr[32]; // 显示用字符串
     LCD_Clear(CHESSBOARD_COL);
 
     // 240*320 选取240*240区域座位棋盘。
@@ -29,21 +28,19 @@ void drawChessboard() {
         LCD_DrawLine(24 + i * 48, 24, 24 + i * 48, 240 - 24); // 竖线
     }
 
-    POINT_COLOR = BLACK;
-    for (int i = 0; i < 5; ++i) {
-        LCD_Draw_Circle(24, 24 + i * 48, PIECE_RADIUS, 1);
-    }
-
-    POINT_COLOR = WHITE;
-    for (int i = 0; i < 5; ++i) {
-        LCD_Draw_Circle(240 - 24, 24 + i * 48, PIECE_RADIUS, 1);
-    }
-
     memset(Table, 0, sizeof(Table));
     Table[0][0] = Table[0][1] = Table[0][2] = Table[0][3] = Table[0][4] = 2; // 黑子
+    BCnt = 5;
     Table[4][0] = Table[4][1] = Table[4][2] = Table[4][3] = Table[4][4] = 1; // 白子
-    WCnt = BCnt = 5;
+    WCnt = 5;
     WinFlag = 0;
+
+    for (int i = 0; i < 5; ++i)
+        for (int j = 0; j < 5; ++j)
+            if (Table[i][j] != 0) {
+                POINT_COLOR = (Table[i][j] == 1) ? WHITE : BLACK;
+                LCD_Draw_Circle(ChessBoardPos[i], ChessBoardPos[j], PIECE_RADIUS, 1);
+            }
 
     sprintf(showstr, "Time for:");
     POINT_COLOR = BLACK;
@@ -257,15 +254,25 @@ void checkEatPiece() {
 
 void Win(int winner) {
     WinFlag = winner;
-    // TODO: 显示胜利信息
+    // 显示胜利信息
+    POINT_COLOR = CHESSBOARD_COL;
+    LCD_DrawRectangle(45, 250, 240 - 45, 280);
+
+    POINT_COLOR = winner == 1 ? WHITE : BLACK;
+    LCD_Draw_Circle(160, 265, PIECE_RADIUS, 1); // 黑子先行
+
+    sprintf(showstr, "Winner is ");
+    POINT_COLOR = BLACK;
+    BACK_COLOR = CHESSBOARD_COL;
+    LCD_ShowString(65, 260, 240, 20, 16, showstr);
 }
 
 void checkEatAll() {
     if (WCnt == 0 || BCnt == 0) {
         if (WCnt == 0)
-            WIN(1);
+            Win(1);
         else
-            WIN(2);
+            Win(2);
     }
 }
 
