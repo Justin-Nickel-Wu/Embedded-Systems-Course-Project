@@ -10,6 +10,7 @@ extern int Table[5][5]; // 棋盘状态，0表示无子，1表示白子，2表�
 extern int PieceX, PieceY, PieceValid; // 当前选中的棋子位置
 extern int LastPieceX, LastPieceY, LastPieceValid; // 上次选中的棋子位置
 extern int WinFlag; // 胜利标志
+extern int AIFlag; // AI输入标志
 
 void drawChessboard(); // 画棋盘
 void reDrawChessboardLine(int x, int y); // 重画棋盘线条

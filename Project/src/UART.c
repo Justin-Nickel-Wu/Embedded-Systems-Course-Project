@@ -9,6 +9,8 @@
 #include <stm32f10x_usart.h>
 #include "stdio.h"
 #include "stdint.h"
+#include "chess.h"
+#include "lcd.h"
 
 void RS232_Configuration(void) {
     GPIO_InitTypeDef GPIO_InitStructure;
@@ -111,12 +113,12 @@ void USART1_IRQHandler(void) {
     }
 }
 
-int RS232_FrameCheck(int len) {
+int RS232_FrameCheck(u8 *buf, int len) {
     uint16_t crc = 0xFFFF;
     uint16_t i, j;
 
     for (i = 0; i < len; i++) {
-        crc ^= USART_Rxbuf[i]; // 低 8 位异或
+        crc ^= buf[i]; // 低 8 位异或
         for (j = 0; j < 8; j++) {
             if (crc & 0x0001) {
                 crc >>= 1;
@@ -133,19 +135,50 @@ void RS232_FrameHandle() {
     int CRCCode;
     FrameFlag = 0;
     // 帧校验，只有校验通过的帧才需要处理，否则直接丢弃
-    CRCCode = RS232_FrameCheck(RXPos - 2);
+    CRCCode = RS232_FrameCheck(USART_Rxbuf, RXPos - 2);
     if ((CRCCode & 0xffff) != ((USART_Rxbuf[RXPos - 1] << 8) + USART_Rxbuf[RXPos - 2])) {
         RXPos = 0;
         return;
     }
 
-    // 处理接收到的数据，暂时只回传
-    for (int i = 0; i < RXPos; i++) {
-        USART_Txbuf[i] = USART_Rxbuf[i];
+    LastPieceX = PieceX;
+    LastPieceY = PieceY;
+    LastPieceValid = PieceValid;
+    if (LastPieceValid) {
+        POINT_COLOR = CHESSBOARD_COL;
+        LCD_Draw_Circle(ChessBoardPos[LastPieceX], ChessBoardPos[LastPieceY], PIECE_RADIUS + 1, 0);
+        reDrawChessboardLine(LastPieceX, LastPieceY);
     }
-    SendBufLen = RXPos;
-    SendPos = 0;
-    USART_SendData(USART1, USART_Txbuf[SendPos]);
+
+    LastPieceX = USART_Rxbuf[0];
+    LastPieceY = USART_Rxbuf[1];
+    LastPieceValid = 1;
+    PieceX = USART_Rxbuf[2];
+    PieceY = USART_Rxbuf[3];
+    PieceValid = 1;
+    AIFlag = 1;
+
+    // // 处理接收到的数据，暂时只回传
+    // for (int i = 0; i < RXPos; i++) {
+    //     USART_Txbuf[i] = USART_Rxbuf[i];
+    // }
+    // SendBufLen = RXPos;
+    // SendPos = 0;
+    // USART_SendData(USART1, USART_Txbuf[SendPos]);
 
     RXPos = 0;
+}
+
+void RS232_SendData(u8 *buf, u16 len) {
+    int CRCCode;
+    for (int i = 0; i < len; i++) {
+        USART_Txbuf[i] = buf[i];
+    }
+    CRCCode = RS232_FrameCheck(USART_Txbuf, len);
+    USART_Txbuf[len++] = CRCCode & 0xff;
+    USART_Txbuf[len++] = (CRCCode >> 8) & 0xff;
+
+    SendBufLen = len;
+    SendPos = 0;
+    USART_SendData(USART1, USART_Txbuf[SendPos]);
 }

@@ -1,4 +1,5 @@
 #include "chess.h"
+#include "UART.h"
 #include "lcd.h"
 
 const int ChessBoardPos[5] = {24, 72, 120, 168, 216};
@@ -13,6 +14,7 @@ int LastPieceX = -1, LastPieceY = -1, LastPieceValid = 0; // 上次选中的棋�
 int Table[5][5]; // 棋盘状态，0表示无子，1表示白子，2表示黑子
 int whichTurn = 2; // 1表示白方，2表示黑方。黑色先行。
 int SelectPieceFlag = 0; // 选择棋子标志
+int AIFlag = 0; // AI输入标志
 int MovePieceFlag = 0; // 移动棋子标志
 int WCnt, BCnt; // 白黑双方棋子数
 int WinFlag;
@@ -108,7 +110,7 @@ void selectPiece() {
 }
 
 void movePiece() {
-    if (SelectPieceFlag) {
+    if (SelectPieceFlag || AIFlag) {
         int LastTouchValid, TouchValid, Distance;
         LastTouchValid = LastPieceValid && Table[LastPieceX][LastPieceY] == whichTurn;
         TouchValid = PieceValid && Table[PieceX][PieceY] == 0;
@@ -116,6 +118,17 @@ void movePiece() {
 
         // 判断是否可以移动
         if (LastTouchValid && TouchValid && (Distance == 1)) {
+            // 移动黑子时需要发送移动信息
+            if (!AIFlag) {
+                u8 buf[4];
+                // UART发送移动信息
+                buf[0] = LastPieceX;
+                buf[1] = LastPieceY;
+                buf[2] = PieceX;
+                buf[3] = PieceY;
+                RS232_SendData(buf, 4);
+            }
+
             // 移动棋子
             Table[PieceX][PieceY] = Table[LastPieceX][LastPieceY];
             Table[LastPieceX][LastPieceY] = 0;
@@ -129,7 +142,8 @@ void movePiece() {
             LCD_Draw_Circle(ChessBoardPos[LastPieceX], ChessBoardPos[LastPieceY], PIECE_RADIUS, 1);
             reDrawChessboardLine(LastPieceX, LastPieceY);
 
-            // 置位移动标志
+            // 置位AI输入、移动标志
+            AIFlag = 0;
             MovePieceFlag = 1;
             return;
         }
@@ -268,11 +282,11 @@ void Win(int winner) {
 }
 
 void checkEatAll() {
-    if (WCnt == 0 || BCnt == 0) {
-        if (WCnt == 0)
-            Win(1);
-        else
+    if (WCnt == 1 || BCnt == 1) {
+        if (WCnt == 1)
             Win(2);
+        else
+            Win(1);
     }
 }
 

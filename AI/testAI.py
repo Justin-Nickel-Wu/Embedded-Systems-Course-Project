@@ -2,6 +2,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import List, Tuple, Optional, Iterable
 import math
+import serial
+import time
+import serial.tools.list_ports
+
 
 Coord = Tuple[int, int]          # (x, y)
 Move = Tuple[Coord, Coord]       # ((x1,y1),(x2,y2))
@@ -83,7 +87,7 @@ class GameState:
         return None
 
     def apply_move(self, mv: Move) -> "GameState":
-        """执行一个（已保证合法的）移动，并按规则处理横向吃子。"""
+        """执行一个（已保证合法的）移动，并按规则处理行+列吃子（仅由本步落点触发）。"""
         (x1, y1), (x2, y2) = mv
         p = self.turn
         q = other(p)
@@ -91,110 +95,104 @@ class GameState:
         # 转成可变
         b = [list(row) for row in self.board]
 
-        # 移动前，用于规则⑤判断
-        row_before = b[y2].copy()  # 只需要看落子所在那一行的“移动前”
-
         # move
         b[y1][x1] = EMPTY
         b[y2][x2] = p
 
-        # 吃子处理（只看横线）
-        captures = self._compute_row_captures(
-            board=b,
-            moved_to=(x2, y2),
-            moved_piece=p,
-            row_before=row_before
-        )
-        for (cx, cy) in captures:
+        # 只检查“本步落点”在 行 与 列 上触发的吃子
+        captures = []
+        captures += self._compute_line_captures(board=b, moved_to=(x2, y2), moved_piece=p, axis="row")
+        captures += self._compute_line_captures(board=b, moved_to=(x2, y2), moved_piece=p, axis="col")
+
+        # 去重并执行
+        for (cx, cy) in dict.fromkeys(captures):
             b[cy][cx] = EMPTY
 
         return GameState(tuple(tuple(r) for r in b), q)
 
+
     @staticmethod
-    def _compute_row_captures(board: List[List[str]],
-                              moved_to: Coord,
-                              moved_piece: str,
-                              row_before: List[str]) -> List[Coord]:
+    def _compute_line_captures(board: List[List[str]],
+                            moved_to: Coord,
+                            moved_piece: str,
+                            axis: str) -> List[Coord]:
         """
-        按规则④⑤⑥：
-        - 在任意一行 y，任意连续三格 (x..x+2) 若都非空且是两同一异，则默认吃掉孤子
-        - 若该三格属于“连续四格都非空”的一段（规则⑥），则不吃
-        - 若将被吃掉的孤子 == 本步刚移动的那颗子，且移动前该行仅存在对方两个相邻子、无其他子（规则⑤），则免死
+        只由“本步落点 moved_to”触发的吃子判定（扫描行或列）：
+        - 仅检查“包含落点”的连续三格窗口
+        - 三格都非空 且 两同一异
+        - 只有当“两同 == moved_piece 且 孤子 == enemy”才吃（不吃自己）
+        - 若窗口任意一格处于“连续四格都非空”段中（同线），则不吃（规则⑥）
         """
         mx, my = moved_to
         enemy = other(moved_piece)
-
-        def row_has_only_two_adjacent_enemy(row: List[str], enemy_piece: str) -> bool:
-            # 行里只有两个 enemy_piece，且它们相邻；其他全空
-            idx = [i for i, c in enumerate(row) if c == enemy_piece]
-            if len(idx) != 2:
-                return False
-            if idx[1] != idx[0] + 1:
-                return False
-            # 不能有己方子或更多敌子
-            for c in row:
-                if c != EMPTY and c != enemy_piece:
-                    return False
-            return True
-
-        # 规则⑤免死判定：只对“本步移动的那颗子”生效
-        suicide_immunity = False
-        if row_has_only_two_adjacent_enemy(row_before, enemy_piece=enemy):
-            # 你是“主动走进”对方双子所在行
-            if my >= 0:  # 占位，逻辑上就是落点那一行
-                suicide_immunity = True
-
         captures: List[Coord] = []
 
-        y = my
-        row = board[y]
+        def get_cell(i: int) -> str:
+            # i 是沿着这条线的坐标：row 用 x；col 用 y
+            if axis == "row":
+                return board[my][i]
+            else:
+                return board[i][mx]
 
-        # helper：判断某个 x 是否处于“连续四格都非空”的窗口里
-        def in_nonempty_run_of_4(x: int, y: int) -> bool:
-            r = board[y]
-            # 可能的4窗口起点：x-3 .. x
-            for s in range(x - 3, x + 1):
-                if 0 <= s <= W - 4:
-                    if all(r[s + k] != EMPTY for k in range(4)):
+        def coord(i: int) -> Coord:
+            if axis == "row":
+                return (i, my)
+            else:
+                return (mx, i)
+
+        def in_nonempty_run_of_4(i: int) -> bool:
+            # 判断线上的位置 i 是否处于任意一个“连续4格都非空”的窗口内
+            L = W if axis == "row" else H
+            for s in range(i - 3, i + 1):
+                if 0 <= s <= L - 4:
+                    ok = True
+                    for k in range(4):
+                        if get_cell(s + k) == EMPTY:
+                            ok = False
+                            break
+                    if ok:
                         return True
             return False
 
-        # 为了不漏：严格来说任何行都可能因本步变化触发吃子，
-        # 但变化只发生在 y1/y2 两行。这里为了简单且稳妥：全盘扫描每一行。
-        # 5x5 很小，成本忽略不计。
-        for yy in range(H):
-            r = board[yy]
-            for x in range(W - 2):
-                a, b, c = r[x], r[x + 1], r[x + 2]
-                if a == EMPTY or b == EMPTY or c == EMPTY:
-                    continue
-                # 两同一异
-                if len({a, b, c}) != 2:
-                    continue
+        L = W if axis == "row" else H
+        pos = mx if axis == "row" else my
 
-                # 规则⑥：若这三格中的“孤子”处在连续四子非空窗口里，则不吃
-                # （更保守：若该三格任意位置属于4连非空窗口，就直接不触发）
-                if any(in_nonempty_run_of_4(x + k, yy) for k in range(3)):
-                    continue
+        # 只枚举“包含落点 pos”的三连窗口起点：pos-2, pos-1, pos
+        for s in (pos - 2, pos - 1, pos):
+            if not (0 <= s <= L - 3):
+                continue
 
-                # 找孤子位置
-                if a != b and b == c:
-                    lone_pos = (x, yy)          # a 是孤子
-                elif c != b and a == b:
-                    lone_pos = (x + 2, yy)      # c 是孤子
-                else:
-                    lone_pos = (x + 1, yy)      # b 是孤子（形如 ABA）
-                    # 题意主要强调 BBW/WBB，这里也允许 ABA 触发（仍满足“两同一异”）
-                    # 如果你确定不该吃 ABA，把这段改成 continue 即可。
+            a, b, c = get_cell(s), get_cell(s + 1), get_cell(s + 2)
+            if a == EMPTY or b == EMPTY or c == EMPTY:
+                continue
 
-                # 规则⑤：若孤子就是本步移动的子，且满足“主动走进对方双子行”，免死
-                if lone_pos == (mx, my) and suicide_immunity:
-                    continue
+            # 两同一异
+            if len({a, b, c}) != 2:
+                continue
 
-                captures.append(lone_pos)
+            # 规则⑥：三格里任意一格在4连非空段内，就不触发
+            if any(in_nonempty_run_of_4(s + k) for k in range(3)):
+                continue
 
-        # 去重（同一子可能被多个三连同时判定）
-        captures = list(dict.fromkeys(captures))
+            # 找孤子位置（index 0/1/2）
+            if a != b and b == c:
+                lone_i = s
+                majority = b
+                lone_piece = a
+            elif c != b and a == b:
+                lone_i = s + 2
+                majority = b
+                lone_piece = c
+            else:
+                # ABA 型：中间是孤子
+                lone_i = s + 1
+                majority = a
+                lone_piece = b
+
+            # 关键：只吃对方孤子，不允许“吃自己”
+            if majority == moved_piece and lone_piece == enemy:
+                captures.append(coord(lone_i))
+
         return captures
 
     def printBoard(self):
@@ -328,24 +326,87 @@ class WhiteAI:
         self.state = self.state.apply_move(mv)
         return x1, y1, x2, y2
     
+ser = serial.Serial(
+    port='COM4',        # 改成你的
+    baudrate=115200,    # 必须和 STM32 一致
+    bytesize=8,
+    parity='N',
+    stopbits=1,
+    timeout=0.005
+)
+
+# 计算 CRC-16 
+def crc16_modbus(data: bytes) -> int:
+    crc = 0xFFFF
+    for b in data:
+        crc ^= b
+        for _ in range(8):
+            if crc & 0x0001:
+                crc >>= 1
+                crc ^= 0xA001
+            else:
+                crc >>= 1
+    return crc & 0xFFFF
+
+def recvUartFrame(ser):
+    frame = bytearray()
+    while True:
+        chunk = ser.read(256)   # 读当前缓冲
+        if chunk:
+            frame += chunk
+        else:
+            # timeout 触发：说明总线空闲了一段时间
+            if frame:
+                return frame
+
+def sendData(ser, msg: bytes):
+    crc = crc16_modbus(msg)
+    msg_with_crc = msg + crc.to_bytes(2, byteorder='little')
+    ser.write(msg_with_crc)
+    print("Sent frame:", msg_with_crc)
+
 # 你在 PC 上调试时可以用这个 main 做命令行对弈
 if __name__ == "__main__":
     ai = WhiteAI(depth=4)
-
-
     ai.state.printBoard()
-    print("输入黑方走法：x1 y1 x2 y2（例如：0 0 1 0）")
-
     while True:
-        if ai.state.is_terminal():
-            print("Game Over. Winner:", ai.state.winner())
-            break
+        frame = recvUartFrame(ser)
+        print("Frame received:", frame)
+        if frame:
+            print("Received frame:", frame)
+            if len(frame) >= 3:  # 至少要有数据和 CRC
+                # 检查校验码
+                data = frame[:-2]
+                received_crc = int.from_bytes(frame[-2:], byteorder='little')
+                calculated_crc = crc16_modbus(data)
+                if received_crc != calculated_crc:
+                    print("CRC check failed. Received:", received_crc, "Calculated:", calculated_crc)
+                    continue
+                print("CRC check passed. Data:", data)
 
-        if ai.state.turn == BLACK:
-            s = input("BLACK> ").strip()
-            x1, y1, x2, y2 = map(int, s.split())
-            ai.apply_opponent_move(x1, y1, x2, y2)
-        else:
-            x1, y1, x2, y2 = ai.choose_move()
-            print(f"WHITE> {x1} {y1} {x2} {y2}")
-        ai.state.printBoard()
+                # 解析收到的数据帧
+                s = data.decode('utf-8').strip()
+                x1, y1, x2, y2 = data
+                ai.apply_opponent_move(x1, y1, x2, y2)
+                print(f"BLACK> {x1} {y1} {x2} {y2}")
+
+                #发送应对数据帧
+                x1, y1, x2, y2 = ai.choose_move()
+                msg = bytes([x1, y1, x2, y2])
+                sendData(ser, msg)
+                print(f"WHITE> {x1} {y1} {x2} {y2}")
+
+                ai.state.printBoard()
+
+        # if ai.state.is_terminal():
+        #     print("Game Over. Winner:", ai.state.winner())
+        #     break
+
+        # if ai.state.turn == BLACK:
+        #     s = input("BLACK> ").strip()
+        #     x1, y1, x2, y2 = map(int, s.split())
+        #     ai.apply_opponent_move(x1, y1, x2, y2)
+        # else:
+        #     x1, y1, x2, y2 = ai.choose_move()
+        #     print(f"WHITE> {x1} {y1} {x2} {y2}")
+        # ai.state.printBoard()

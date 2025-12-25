@@ -1035,7 +1035,7 @@ void Touch_Check() {
         while (status == 1) {
             LCD_ShowString(45, 0, 240, 12, 12, "Press No.2 Point");
             if (PressFlag > 0) { // 已经触摸过了
-                PointX_ADmax = PointX_ADmax != 0 ? PointX_ADmax * 0.1 + xScreenAD * 0.9 : xScreenAD;
+                PointX_ADmax = PointX_ADmax != 0 ? PointX_ADmax * 0.1 + xScreenAD * 0.9 : xScreenAD;	
                 PointY_ADmax = PointY_ADmax != 0 ? PointY_ADmax * 0.1 + yScreenAD * 0.9 : yScreenAD;
                 sprintf(showstr, "TouchAD, x:%4d y%4d   ", xScreenAD, yScreenAD);
                 LCD_ShowString(45, 60, 240, 12, 12, showstr);
