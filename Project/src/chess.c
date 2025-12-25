@@ -30,12 +30,12 @@ void drawChessboard() {
         LCD_DrawLine(24 + i * 48, 24, 24 + i * 48, 240 - 24); // 竖线
     }
 
+    // 初始化棋子位置，并绘制
     memset(Table, 0, sizeof(Table));
     Table[0][0] = Table[0][1] = Table[0][2] = Table[0][3] = Table[0][4] = 2; // 黑子
     BCnt = 5;
     Table[4][0] = Table[4][1] = Table[4][2] = Table[4][3] = Table[4][4] = 1; // 白子
     WCnt = 5;
-    WinFlag = 0;
 
     for (int i = 0; i < 5; ++i)
         for (int j = 0; j < 5; ++j)
@@ -43,6 +43,15 @@ void drawChessboard() {
                 POINT_COLOR = (Table[i][j] == 1) ? WHITE : BLACK;
                 LCD_Draw_Circle(ChessBoardPos[i], ChessBoardPos[j], PIECE_RADIUS, 1);
             }
+
+    // 重置各种标志位
+    WinFlag = 0;
+    PieceX = PieceY = -1, PieceValid = 0;
+    LastPieceX = LastPieceY = -1, LastPieceValid = 0;
+    whichTurn = 2;
+    SelectPieceFlag = 0;
+    AIFlag = 0;
+    MovePieceFlag = 0;
 
     sprintf(showstr, "Time for:");
     POINT_COLOR = BLACK;

@@ -26,6 +26,7 @@
 #include "stm32f10x.h"
 #include "chess.h"
 #include "lcd.h"
+#include "EXTI.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -39,9 +40,9 @@ TIM_OCInitTypeDef TIM_OCInitStructure;
 void RCC_Configuration(void);
 extern u16 FrameFlag;
 
-int main(void) {
-    FrameFlag = 0;
+void Init() {
     SystemInit(); // 初始化系统时钟为72M
+    EXTIX_Init();
     RS232_Configuration();
     NVIC_Configuration();
     systick_init();
@@ -50,9 +51,21 @@ int main(void) {
     LCD_Init();
     Touch_Check();
 
-    drawChessboard();
-    ShowTouchFlag = 1; // 显示触摸点
+    FrameFlag = 0;
+    ShowTouchFlag = 0; // 显示触摸点
+    GameResetFlag = 1; // 初始化棋盘
+}
+
+int main(void) {
+    Init();
     while (1) {
+        if (GameResetFlag) {
+            u8 buf[5] = {'R', 'E', 'S', 'E', 'T'};
+            RS232_SendData(buf, 5); // 发送RESET指令
+            drawChessboard();
+            GameResetFlag = 0;
+        }
+        if (WinFlag != 0) continue; // 已经分出胜负，停止一切操作
         selectPiece();
         movePiece();
         changeTurn();
@@ -60,10 +73,6 @@ int main(void) {
         showTouch();
         if (FrameFlag != 0) {
             RS232_FrameHandle();
-        }
-        if (WinFlag != 0) {
-            while (1);
-            // TODO: 增加再来一局功能
         }
     }
 }

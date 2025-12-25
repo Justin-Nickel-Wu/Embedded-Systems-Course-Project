@@ -117,79 +117,61 @@ class GameState:
                             moved_piece: str,
                             axis: str) -> List[Coord]:
         """
-        只由“本步落点 moved_to”触发的吃子判定（扫描行或列）：
-        - 仅检查“包含落点”的连续三格窗口
-        - 三格都非空 且 两同一异
-        - 只有当“两同 == moved_piece 且 孤子 == enemy”才吃（不吃自己）
-        - 若窗口任意一格处于“连续四格都非空”段中（同线），则不吃（规则⑥）
+        只由“本步落点 moved_to”触发的吃子判定（行 / 列）：
+
+        规则：
+        1. 只检查落点所在的行或列
+        2. 若该行/列非空棋子数 >= 4，则整条线不发生吃子
+        3. 否则，仅检查“包含落点”的连续三格
+        4. 三格都非空，且“两同一异”
+        5. 仅当“两同 == moved_piece 且 孤子 == enemy”时，吃掉孤子
         """
         mx, my = moved_to
         enemy = other(moved_piece)
         captures: List[Coord] = []
 
+        # --- 线访问工具 ---
         def get_cell(i: int) -> str:
-            # i 是沿着这条线的坐标：row 用 x；col 用 y
-            if axis == "row":
-                return board[my][i]
-            else:
-                return board[i][mx]
+            return board[my][i] if axis == "row" else board[i][mx]
 
         def coord(i: int) -> Coord:
-            if axis == "row":
-                return (i, my)
-            else:
-                return (mx, i)
-
-        def in_nonempty_run_of_4(i: int) -> bool:
-            # 判断线上的位置 i 是否处于任意一个“连续4格都非空”的窗口内
-            L = W if axis == "row" else H
-            for s in range(i - 3, i + 1):
-                if 0 <= s <= L - 4:
-                    ok = True
-                    for k in range(4):
-                        if get_cell(s + k) == EMPTY:
-                            ok = False
-                            break
-                    if ok:
-                        return True
-            return False
+            return (i, my) if axis == "row" else (mx, i)
 
         L = W if axis == "row" else H
         pos = mx if axis == "row" else my
 
-        # 只枚举“包含落点 pos”的三连窗口起点：pos-2, pos-1, pos
+        # --- 规则：整条线 >=4 子，禁止吃子 ---
+        nonempty = sum(1 for i in range(L) if get_cell(i) != EMPTY)
+        if nonempty >= 4:
+            return []
+
+        # --- 仅枚举“包含落点”的三连窗口 ---
         for s in (pos - 2, pos - 1, pos):
             if not (0 <= s <= L - 3):
                 continue
 
-            a, b, c = get_cell(s), get_cell(s + 1), get_cell(s + 2)
-            if a == EMPTY or b == EMPTY or c == EMPTY:
+            a = get_cell(s)
+            b = get_cell(s + 1)
+            c = get_cell(s + 2)
+
+            # 三格必须全非空
+            if EMPTY in (a, b, c):
                 continue
 
-            # 两同一异
+            # 必须是“两同一异”
             if len({a, b, c}) != 2:
                 continue
 
-            # 规则⑥：三格里任意一格在4连非空段内，就不触发
-            if any(in_nonempty_run_of_4(s + k) for k in range(3)):
-                continue
-
-            # 找孤子位置（index 0/1/2）
+            # --- 找孤子 ---
             if a != b and b == c:
-                lone_i = s
-                majority = b
-                lone_piece = a
+                lone_i, majority, lone_piece = s, b, a
             elif c != b and a == b:
-                lone_i = s + 2
-                majority = b
-                lone_piece = c
+                lone_i, majority, lone_piece = s + 2, b, c
             else:
-                # ABA 型：中间是孤子
-                lone_i = s + 1
-                majority = a
-                lone_piece = b
+                # ABA 型
+                lone_i, majority, lone_piece = s + 1, a, b
 
-            # 关键：只吃对方孤子，不允许“吃自己”
+            # --- 只吃对方，不吃自己 ---
             if majority == moved_piece and lone_piece == enemy:
                 captures.append(coord(lone_i))
 
@@ -386,6 +368,12 @@ if __name__ == "__main__":
 
                 # 解析收到的数据帧
                 s = data.decode('utf-8').strip()
+                if s == "RESET":
+                    ai = WhiteAI(depth=4)
+                    print("Game reset.")
+                    ai.state.printBoard()
+                    continue
+                
                 x1, y1, x2, y2 = data
                 ai.apply_opponent_move(x1, y1, x2, y2)
                 print(f"BLACK> {x1} {y1} {x2} {y2}")
