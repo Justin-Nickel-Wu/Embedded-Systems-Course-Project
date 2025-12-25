@@ -30,3 +30,4 @@ JLinkSettings.ini
 #vscode settings
 .vscode/
 .clang-format
+AI/venv/

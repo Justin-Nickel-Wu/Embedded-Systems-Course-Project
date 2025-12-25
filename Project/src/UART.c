@@ -112,41 +112,40 @@ void USART1_IRQHandler(void) {
 }
 
 int RS232_FrameCheck(int len) {
-    int CRCCode = 0xffff0000;
-    // 此处自己完成校验码的计算，比较简单的如累加和，可靠一点的可以ModebusCRC16,也就是循环冗余校验
+    uint16_t crc = 0xFFFF;
+    uint16_t i, j;
 
-    return CRCCode; // 低16位位CRC码，
+    for (i = 0; i < len; i++) {
+        crc ^= USART_Rxbuf[i]; // 低 8 位异或
+        for (j = 0; j < 8; j++) {
+            if (crc & 0x0001) {
+                crc >>= 1;
+                crc ^= 0xA001;
+            } else {
+                crc >>= 1;
+            }
+        }
+    }
+    return crc; // 低16位位CRC码，
 }
 
 void RS232_FrameHandle() {
     int CRCCode;
-    // 第一步，帧校验，只有校验通过的帧才需要处理，否则直接丢弃
-    CRCCode = RS232_FrameCheck(SendPos - 2);
-    if ((CRCCode & 0xffff) != ((USART_Rxbuf[RXPos - 2] << 8) + USART_Rxbuf[RXPos - 1])) {
+    FrameFlag = 0;
+    // 帧校验，只有校验通过的帧才需要处理，否则直接丢弃
+    CRCCode = RS232_FrameCheck(RXPos - 2);
+    if ((CRCCode & 0xffff) != ((USART_Rxbuf[RXPos - 1] << 8) + USART_Rxbuf[RXPos - 2])) {
+        RXPos = 0;
         return;
     }
-    // 第二步，帧的内容处理
-    USART_Txbuf[0] = USART_Rxbuf[0];
-    USART_Txbuf[1] = USART_Rxbuf[1];
-    SendPos = 0;
-    RXPos = 0;
-    switch (USART_Rxbuf[1]) {
-    case 3: // 读取缓冲区内容
-        USART_Txbuf[2] = USART_Rxbuf[5] * 2;
-        SendBufLen = USART_Txbuf[2] + 5;
-        USART_Txbuf[SendBufLen - 1] = CRCCode;
-        USART_Txbuf[SendBufLen - 2] = CRCCode >> 8;
-        USART_SendData(USART1, USART_Txbuf[0]);
-        break;
-    case 6: // 写缓冲区2个字节
 
-        break;
-    case 0x10: // 写缓冲区2n个字节
-
-        break;
-
-    default:
-        break;
+    // 处理接收到的数据，暂时只回传
+    for (int i = 0; i < RXPos; i++) {
+        USART_Txbuf[i] = USART_Rxbuf[i];
     }
+    SendBufLen = RXPos;
+    SendPos = 0;
+    USART_SendData(USART1, USART_Txbuf[SendPos]);
+
     RXPos = 0;
 }

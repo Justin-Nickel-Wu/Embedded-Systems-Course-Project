@@ -60,7 +60,6 @@ int main(void) {
         showTouch();
         if (FrameFlag != 0) {
             RS232_FrameHandle();
-            FrameFlag = 0;
         }
         if (WinFlag != 0) {
             while (1);
