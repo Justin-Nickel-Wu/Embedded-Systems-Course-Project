@@ -3,8 +3,6 @@ from dataclasses import dataclass
 from typing import List, Tuple, Optional, Iterable
 import math
 import serial
-import time
-import serial.tools.list_ports
 
 
 Coord = Tuple[int, int]          # (x, y)
@@ -347,7 +345,7 @@ def sendData(ser, msg: bytes):
     ser.write(msg_with_crc)
     print("Sent frame:", msg_with_crc)
 
-# 你在 PC 上调试时可以用这个 main 做命令行对弈
+# ---------------- 主循环 ----------------
 if __name__ == "__main__":
     ai = WhiteAI(depth=4)
     ai.state.printBoard()
