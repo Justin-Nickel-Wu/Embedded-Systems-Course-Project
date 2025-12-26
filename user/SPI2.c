@@ -62,3 +62,24 @@ void W25Q32_ReadID(u8 *buf) {
 
     W25Q32_CS_HIGH(); // 拉高 CS，结束通信
 }
+
+u8 W25Q32_ReadSR(void) {
+    u8 sr;
+
+    FLASH_CS_LOW();
+    SPI2_ReadWriteByte(W25X_ReadStatusReg1);
+    sr = SPI2_ReadWriteByte(0xFF);
+    FLASH_CS_HIGH();
+
+    return sr;
+}
+
+void W25Q32_WaitBusy(void) {
+    while (W25Q32_ReadSR() & 0x01); // WIP 位为1表示忙
+}
+
+void W25Q32_WriteEnable(void) {
+    FLASH_CS_LOW();
+    SPI2_ReadWriteByte(W25X_WriteEnable);
+    FLASH_CS_HIGH();
+}
