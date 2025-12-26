@@ -347,40 +347,56 @@ def sendData(ser, msg: bytes):
 
 # ---------------- 主循环 ----------------
 if __name__ == "__main__":
-    ai = WhiteAI(depth=4)
-    ai.state.printBoard()
+
+    while True:
+        try:
+            depth = int(input("请输入 AI 搜索深度（例如 0 / 1 / 2 / 3 / 4）：").strip())
+            if depth >= 0:
+                break
+            else:
+                print("搜索深度必须是非负整数。")
+        except ValueError:
+            print("请输入一个整数。")
+
+    print(f"AI 搜索深度已设置为 {depth}")
+    print("等待走子...\n")
+
+    ai = WhiteAI(depth=depth)
     while True:
         frame = recvUartFrame(ser)
-        print("Frame received:", frame)
+        print("===============================\n")
+        print("收到数据帧:", frame)
         if frame:
-            print("Received frame:", frame)
             if len(frame) >= 3:  # 至少要有数据和 CRC
                 # 检查校验码
                 data = frame[:-2]
                 received_crc = int.from_bytes(frame[-2:], byteorder='little')
                 calculated_crc = crc16_modbus(data)
                 if received_crc != calculated_crc:
-                    print("CRC check failed. Received:", received_crc, "Calculated:", calculated_crc)
+                    print("CRC 校验失败。收到的 CRC:", received_crc, "计算的 CRC:", calculated_crc)
                     continue
-                print("CRC check passed. Data:", data)
+                print("CRC 校验通过。数据:", data)
 
                 # 解析收到的数据帧
                 s = data.decode('utf-8').strip()
                 if s == "RESET":
                     ai = WhiteAI(depth=4)
-                    print("Game reset.")
+                    print("\n游戏重置\n")
                     ai.state.printBoard()
                     continue
                 
                 x1, y1, x2, y2 = data
                 ai.apply_opponent_move(x1, y1, x2, y2)
-                print(f"BLACK> {x1} {y1} {x2} {y2}")
 
                 #发送应对数据帧
-                x1, y1, x2, y2 = ai.choose_move()
-                msg = bytes([x1, y1, x2, y2])
+                xx1, yy1, xx2, yy2 = ai.choose_move()
+                msg = bytes([xx1, yy1, xx2, yy2])
                 sendData(ser, msg)
-                print(f"WHITE> {x1} {y1} {x2} {y2}")
+
+                # 输出日志
+                print()
+                print(f"BLACK> ({x1},{y1}) -> ({x2},{y2})")
+                print(f"WHITE> ({xx1},{yy1}) -> ({xx2},{yy2})\n")
 
                 ai.state.printBoard()
 
