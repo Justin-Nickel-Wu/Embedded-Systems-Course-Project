@@ -16,8 +16,6 @@ Release/
 
 # Keil user-specific files
 *.uvguix.*
-*.uvoptx
-*.uvopt
 *.dep
 *.bak
 
